@@ -1,0 +1,19 @@
+[package]
+name = "fea"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+description = "Finite Element Analysis (FEA) methods and visualization utilities in Rust"
+repository = "https://github.com/Inokinoki/fea-rs"
+readme = "README.md"
+
+[dependencies]
+anyhow = "1"
+nalgebra = "0.33"
+
+[dev-dependencies]
+approx = "0.5"
+
+[features]
+default = []
+
