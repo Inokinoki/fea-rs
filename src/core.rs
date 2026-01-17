@@ -63,13 +63,25 @@ impl Node {
 ///
 /// The library currently focuses on truss-like problems where each node has
 /// displacement DOFs in X/Y/Z.
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct Model<E> {
     pub nodes: Vec<Node>,
     pub elements: Vec<E>,
     pub loads: Vec<Load>,
     pub bcs: Vec<BoundaryCondition>,
     dof_map: BTreeMap<(NodeId, Dof), usize>,
+}
+
+impl<E> Default for Model<E> {
+    fn default() -> Self {
+        Self {
+            nodes: Vec::new(),
+            elements: Vec::new(),
+            loads: Vec::new(),
+            bcs: Vec::new(),
+            dof_map: BTreeMap::new(),
+        }
+    }
 }
 
 impl<E> Model<E> {
