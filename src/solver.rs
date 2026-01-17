@@ -89,7 +89,12 @@ fn solve_with_dirichlet(
 ) -> anyhow::Result<(Vec<f64>, BTreeMap<usize, f64>)> {
     let ndof = k.nrows();
     if ndof != k.ncols() || ndof != f.len() {
-        anyhow::bail!("dimension mismatch: K is {}x{}, f is {}", k.nrows(), k.ncols(), f.len());
+        anyhow::bail!(
+            "dimension mismatch: K is {}x{}, f is {}",
+            k.nrows(),
+            k.ncols(),
+            f.len()
+        );
     }
 
     // Constrained dofs and their prescribed values.
@@ -160,4 +165,3 @@ fn compute_reactions(
     }
     out
 }
-

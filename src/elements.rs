@@ -53,16 +53,34 @@ impl Truss2 {
         if l == 0.0 {
             return 0.0;
         }
-        let dof = |nid: NodeId, d: Dof| model.dof_index(nid, d).unwrap();
+        let dof = |nid: NodeId, d: Dof| model.dof_index(nid, d);
+        let Some(i11) = dof(self.n1, Dof::Ux) else {
+            return 0.0;
+        };
+        let Some(i12) = dof(self.n1, Dof::Uy) else {
+            return 0.0;
+        };
+        let Some(i13) = dof(self.n1, Dof::Uz) else {
+            return 0.0;
+        };
+        let Some(i21) = dof(self.n2, Dof::Ux) else {
+            return 0.0;
+        };
+        let Some(i22) = dof(self.n2, Dof::Uy) else {
+            return 0.0;
+        };
+        let Some(i23) = dof(self.n2, Dof::Uz) else {
+            return 0.0;
+        };
         let u1 = [
-            u[dof(self.n1, Dof::Ux)],
-            u[dof(self.n1, Dof::Uy)],
-            u[dof(self.n1, Dof::Uz)],
+            *u.get(i11).unwrap_or(&0.0),
+            *u.get(i12).unwrap_or(&0.0),
+            *u.get(i13).unwrap_or(&0.0),
         ];
         let u2 = [
-            u[dof(self.n2, Dof::Ux)],
-            u[dof(self.n2, Dof::Uy)],
-            u[dof(self.n2, Dof::Uz)],
+            *u.get(i21).unwrap_or(&0.0),
+            *u.get(i22).unwrap_or(&0.0),
+            *u.get(i23).unwrap_or(&0.0),
         ];
         let du = [u2[0] - u1[0], u2[1] - u1[1], u2[2] - u1[2]];
         let delta_l = du[0] * dir[0] + du[1] * dir[1] + du[2] * dir[2];
@@ -104,4 +122,3 @@ impl Element for Truss2 {
         ke
     }
 }
-

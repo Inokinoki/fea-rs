@@ -16,6 +16,5 @@ pub mod prelude {
     pub use crate::core::{BoundaryCondition, Dof, Load, Model, NodeId};
     pub use crate::elements::{Element, Truss2};
     pub use crate::solver::{LinearStaticResult, LinearStaticSolver};
-    pub use crate::viz::{VtkLegacyWriter, VtkMesh};
+    pub use crate::viz::{JsonWriter, VtkLegacyWriter, VtkMesh};
 }
-

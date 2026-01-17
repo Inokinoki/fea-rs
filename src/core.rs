@@ -116,4 +116,3 @@ impl<E> Model<E> {
         self.dof_map.get(&(node, dof)).copied()
     }
 }
-

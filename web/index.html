@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>fea-rs viewer</title>
+    <style>
+      html, body { height: 100%; margin: 0; background: #0b0f14; color: #e6edf3; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+      #app { position: fixed; inset: 0; }
+      #hud {
+        position: fixed;
+        top: 12px; left: 12px;
+        background: rgba(17, 24, 39, 0.78);
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        border-radius: 10px;
+        padding: 10px 12px;
+        backdrop-filter: blur(6px);
+        max-width: min(520px, calc(100vw - 24px));
+      }
+      #hud h1 { font-size: 14px; margin: 0 0 8px; font-weight: 600; }
+      .row { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
+      .row label { font-size: 12px; opacity: 0.9; min-width: 120px; }
+      input[type="range"] { width: 260px; }
+      .pill { font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid rgba(148,163,184,0.25); background: rgba(2,6,23,0.35); }
+      a { color: #93c5fd; }
+      #status { font-size: 12px; opacity: 0.85; margin-top: 6px; }
+      code { background: rgba(2,6,23,0.5); padding: 1px 6px; border-radius: 6px; }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <div id="hud">
+      <h1>fea-rs viewer</h1>
+      <div class="row">
+        <label for="scale">Deformation scale</label>
+        <input id="scale" type="range" min="0" max="200" step="1" value="20" />
+        <span id="scaleVal" class="pill">20×</span>
+      </div>
+      <div class="row">
+        <label><input id="showUndeformed" type="checkbox" checked /> Show undeformed</label>
+        <label><input id="showDeformed" type="checkbox" checked /> Show deformed</label>
+      </div>
+      <div id="status">
+        Loads <code>model.json</code>. If you opened this from disk and it fails to load, serve it:
+        <code>python3 -m http.server</code>
+      </div>
+    </div>
+    <script type="module" src="./viewer.js"></script>
+  </body>
+</html>
+

@@ -1,5 +1,6 @@
 use crate::core::{Dof, Model};
 use crate::elements::Truss2;
+use serde::Serialize;
 use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::path::Path;
@@ -88,9 +89,21 @@ impl VtkLegacyWriter {
         writeln!(w, "POINT_DATA {}", mesh.points.len())?;
         writeln!(w, "VECTORS displacement float")?;
         for nid in 0..model.nodes.len() {
-            let ux = model.dof_index(nid, Dof::Ux).and_then(|i| u.get(i)).copied().unwrap_or(0.0);
-            let uy = model.dof_index(nid, Dof::Uy).and_then(|i| u.get(i)).copied().unwrap_or(0.0);
-            let uz = model.dof_index(nid, Dof::Uz).and_then(|i| u.get(i)).copied().unwrap_or(0.0);
+            let ux = model
+                .dof_index(nid, Dof::Ux)
+                .and_then(|i| u.get(i))
+                .copied()
+                .unwrap_or(0.0);
+            let uy = model
+                .dof_index(nid, Dof::Uy)
+                .and_then(|i| u.get(i))
+                .copied()
+                .unwrap_or(0.0);
+            let uz = model
+                .dof_index(nid, Dof::Uz)
+                .and_then(|i| u.get(i))
+                .copied()
+                .unwrap_or(0.0);
             writeln!(w, "{} {} {}", ux, uy, uz)?;
         }
 
@@ -108,3 +121,81 @@ impl VtkLegacyWriter {
     }
 }
 
+/// A simple JSON format intended for web visualization.
+#[derive(Debug, Clone, Serialize)]
+pub struct JsonTruss2 {
+    pub points: Vec<[f64; 3]>,
+    pub cells: Vec<[usize; 2]>,
+    pub point_data: JsonPointData,
+    pub cell_data: JsonCellData,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct JsonPointData {
+    pub displacement: Vec<[f64; 3]>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct JsonCellData {
+    pub axial_stress: Vec<f64>,
+}
+
+/// Writes JSON files for simple web visualization.
+#[derive(Debug, Default)]
+pub struct JsonWriter;
+
+impl JsonWriter {
+    pub fn new() -> Self {
+        Self
+    }
+
+    pub fn write_truss2<P: AsRef<Path>>(
+        &self,
+        path: P,
+        model: &Model<Truss2>,
+        u: &[f64],
+    ) -> std::io::Result<()> {
+        let points: Vec<[f64; 3]> = model.nodes.iter().map(|n| n.as_array()).collect();
+        let cells: Vec<[usize; 2]> = model.elements.iter().map(|e| [e.n1, e.n2]).collect();
+
+        let mut displacement = Vec::with_capacity(model.nodes.len());
+        for nid in 0..model.nodes.len() {
+            let ux = model
+                .dof_index(nid, Dof::Ux)
+                .and_then(|i| u.get(i))
+                .copied()
+                .unwrap_or(0.0);
+            let uy = model
+                .dof_index(nid, Dof::Uy)
+                .and_then(|i| u.get(i))
+                .copied()
+                .unwrap_or(0.0);
+            let uz = model
+                .dof_index(nid, Dof::Uz)
+                .and_then(|i| u.get(i))
+                .copied()
+                .unwrap_or(0.0);
+            displacement.push([ux, uy, uz]);
+        }
+
+        let axial_stress: Vec<f64> = model
+            .elements
+            .iter()
+            .map(|e| e.axial_stress(model, u))
+            .collect();
+
+        let data = JsonTruss2 {
+            points,
+            cells,
+            point_data: JsonPointData { displacement },
+            cell_data: JsonCellData { axial_stress },
+        };
+
+        let file = File::create(path)?;
+        let mut w = BufWriter::new(file);
+        serde_json::to_writer_pretty(&mut w, &data)
+            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
+        w.flush()?;
+        Ok(())
+    }
+}
