@@ -32,7 +32,7 @@ pub mod prelude {
         ElementResult, NodalDisplacement, ReactionForce, ResultStatistics,
     };
     pub use crate::solver::{LinearStaticResult, LinearStaticSolver};
-    pub use crate::solvers::{ConjugateGradient, ConjugateGradientConfig, GaussSeidel, Preconditioner};
+    pub use crate::solvers::{ConjugateGradient, ConjugateGradientConfig, GaussSeidel, GMRES, PCG, Preconditioner};
     pub use crate::sparse::{CsrMatrix, SparseConjugateGradient};
     pub use crate::viz::{JsonWriter, VtkLegacyWriter, VtkMesh, VizConfig};
 }
