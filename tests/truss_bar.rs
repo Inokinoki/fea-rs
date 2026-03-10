@@ -1,6 +1,8 @@
 use approx::assert_relative_eq;
 use fea::prelude::*;
 use fea::core::Node;
+use fea::modal::{ModalSolver, ModalConfig, MassFormulation};
+use fea::beam::{Beam2D, BeamModel, assemble_beam_stiffness};
 
 // =============================================================================
 // Unit Tests for Core Module
@@ -735,4 +737,236 @@ fn test_json_writer_displacement_values() -> anyhow::Result<()> {
     std::fs::remove_file(temp_path)?;
 
     Ok(())
+}
+
+// =============================================================================
+// Modal Analysis Tests
+// =============================================================================
+
+#[test]
+fn test_modal_analysis_simple_truss() -> anyhow::Result<()> {
+    let e = 210e9;
+    let a = 1.0e-4;
+    let l = 1.0;
+
+    let mut model = Model::<Truss2>::new();
+    let n0 = model.add_node(Node::new_2d(0.0, 0.0));
+    let n1 = model.add_node(Node::new_2d(l, 0.0));
+    model.add_element(Truss2::new(n0, n1, e, a));
+
+    // Fix n0 completely
+    for dof in [Dof::Ux, Dof::Uy, Dof::Uz] {
+        model.add_bc(BoundaryCondition {
+            node: n0,
+            dof,
+            value: 0.0,
+        });
+    }
+    // Constrain n1 in Y and Z
+    for dof in [Dof::Uy, Dof::Uz] {
+        model.add_bc(BoundaryCondition {
+            node: n1,
+            dof,
+            value: 0.0,
+        });
+    }
+
+    let config = ModalConfig {
+        num_modes: 1,
+        mass_formulation: MassFormulation::Lumped,
+        max_iterations: 100,
+        tolerance: 1e-8,
+    };
+    let solver = ModalSolver::with_config(config);
+    let result = solver.analyze_truss2(&mut model)?;
+
+    // Should find at least one mode
+    assert!(!result.frequencies.is_empty());
+    assert!(result.frequencies[0] > 0.0, "Natural frequency should be positive");
+
+    Ok(())
+}
+
+#[test]
+fn test_modal_analysis_multi_element() -> anyhow::Result<()> {
+    let e = 210e9;
+    let a = 1.0e-4;
+    let l = 0.5;
+
+    let mut model = Model::<Truss2>::new();
+
+    // Create 3-element bar
+    let n0 = model.add_node(Node::new_2d(0.0, 0.0));
+    let n1 = model.add_node(Node::new_2d(l, 0.0));
+    let n2 = model.add_node(Node::new_2d(2.0 * l, 0.0));
+    let n3 = model.add_node(Node::new_2d(3.0 * l, 0.0));
+
+    model.add_element(Truss2::new(n0, n1, e, a));
+    model.add_element(Truss2::new(n1, n2, e, a));
+    model.add_element(Truss2::new(n2, n3, e, a));
+
+    // Fix n0
+    for dof in [Dof::Ux, Dof::Uy, Dof::Uz] {
+        model.add_bc(BoundaryCondition {
+            node: n0,
+            dof,
+            value: 0.0,
+        });
+    }
+    // Constrain Y/Z for other nodes
+    for &n in &[n1, n2, n3] {
+        for dof in [Dof::Uy, Dof::Uz] {
+            model.add_bc(BoundaryCondition {
+                node: n,
+                dof,
+                value: 0.0,
+            });
+        }
+    }
+
+    let solver = ModalSolver::new();
+    let result = solver.analyze_truss2(&mut model)?;
+
+    // Should find modes
+    assert!(!result.frequencies.is_empty());
+
+    // Frequencies should increase for higher modes
+    for i in 1..result.frequencies.len() {
+        assert!(result.frequencies[i] >= result.frequencies[i - 1]);
+    }
+
+    Ok(())
+}
+
+#[test]
+fn test_modal_analysis_consistent_mass() -> anyhow::Result<()> {
+    let e = 210e9;
+    let a = 1.0e-4;
+    let l = 1.0;
+
+    let mut model = Model::<Truss2>::new();
+    let n0 = model.add_node(Node::new_2d(0.0, 0.0));
+    let n1 = model.add_node(Node::new_2d(l, 0.0));
+    model.add_element(Truss2::new(n0, n1, e, a));
+
+    for dof in [Dof::Ux, Dof::Uy, Dof::Uz] {
+        model.add_bc(BoundaryCondition {
+            node: n0,
+            dof,
+            value: 0.0,
+        });
+    }
+    for dof in [Dof::Uy, Dof::Uz] {
+        model.add_bc(BoundaryCondition {
+            node: n1,
+            dof,
+            value: 0.0,
+        });
+    }
+
+    let config = ModalConfig {
+        num_modes: 1,
+        mass_formulation: MassFormulation::Consistent,
+        ..Default::default()
+    };
+    let solver = ModalSolver::with_config(config);
+    let result = solver.analyze_truss2(&mut model)?;
+
+    assert!(!result.frequencies.is_empty());
+    assert!(result.frequencies[0] > 0.0);
+
+    Ok(())
+}
+
+// =============================================================================
+// Beam Element Tests
+// =============================================================================
+
+#[test]
+fn test_beam_cantilever_static() {
+    // Cantilever beam with point load at tip
+    let mut model = BeamModel::new();
+    let n0 = model.add_node([0.0, 0.0]);
+    let n1 = model.add_node([1.0, 0.0]);
+
+    let e = 210e9;
+    let a = 1e-4;
+    let i = 1e-8;
+    let l = 1.0;
+
+    model.add_element(Beam2D::new(n0, n1, e, a, i));
+
+    // Assemble stiffness (6 DOFs total)
+    let k = assemble_beam_stiffness(&model, 6);
+
+    // Check that axial stiffness is correct: EA/L
+    let expected_axial = e * a / l;
+    assert_relative_eq!(k[(0, 0)], expected_axial, max_relative = 1e-10);
+
+    // Check bending stiffness: 12EI/L^3
+    let expected_bending = 12.0 * e * i / (l * l * l);
+    assert_relative_eq!(k[(1, 1)], expected_bending, max_relative = 1e-10);
+
+    // Check rotational stiffness: 4EI/L
+    let expected_rotation = 4.0 * e * i / l;
+    assert_relative_eq!(k[(2, 2)], expected_rotation, max_relative = 1e-10);
+}
+
+#[test]
+fn test_beam_simply_supported() {
+    // Simply supported beam
+    let mut model = BeamModel::new();
+    let n0 = model.add_node([0.0, 0.0]);
+    let n1 = model.add_node([2.0, 0.0]);
+    let n2 = model.add_node([4.0, 0.0]);
+
+    let e = 210e9;
+    let a = 1e-4;
+    let i = 1e-8;
+
+    model.add_element(Beam2D::new(n0, n1, e, a, i));
+    model.add_element(Beam2D::new(n1, n2, e, a, i));
+
+    let k = assemble_beam_stiffness(&model, 9); // 3 nodes * 3 DOFs
+
+    assert_eq!(k.nrows(), 9);
+    assert_eq!(k.ncols(), 9);
+
+    // Stiffness matrix should be symmetric
+    for i in 0..9 {
+        for j in 0..9 {
+            assert_relative_eq!(k[(i, j)], k[(j, i)], epsilon = 1e-10);
+        }
+    }
+}
+
+#[test]
+fn test_beam_element_length_various_orientations() {
+    // Test horizontal beam
+    let mut model = BeamModel::new();
+    let n0 = model.add_node([0.0, 0.0]);
+    let n1 = model.add_node([3.0, 0.0]);
+    let beam = Beam2D::new(n0, n1, 210e9, 1e-4, 1e-8);
+    let (len, dir) = beam.length_and_dir(&model);
+    assert_relative_eq!(len, 3.0, epsilon = 1e-12);
+    assert_relative_eq!(dir[0], 1.0, epsilon = 1e-12);
+
+    // Test vertical beam
+    let mut model = BeamModel::new();
+    let n0 = model.add_node([0.0, 0.0]);
+    let n1 = model.add_node([0.0, 4.0]);
+    let beam = Beam2D::new(n0, n1, 210e9, 1e-4, 1e-8);
+    let (len, dir) = beam.length_and_dir(&model);
+    assert_relative_eq!(len, 4.0, epsilon = 1e-12);
+    assert_relative_eq!(dir[1], 1.0, epsilon = 1e-12);
+
+    // Test diagonal beam (3-4-5 triangle)
+    let mut model = BeamModel::new();
+    let n0 = model.add_node([0.0, 0.0]);
+    let n1 = model.add_node([3.0, 4.0]);
+    let beam = Beam2D::new(n0, n1, 210e9, 1e-4, 1e-8);
+    let (len, dir) = beam.length_and_dir(&model);
+    assert_relative_eq!(len, 5.0, epsilon = 1e-12);
+    assert_relative_eq!(dir[0], 0.6, epsilon = 1e-12);
+    assert_relative_eq!(dir[1], 0.8, epsilon = 1e-12);
 }

@@ -16,15 +16,18 @@
         padding: 10px 12px;
         backdrop-filter: blur(6px);
         max-width: min(520px, calc(100vw - 24px));
+        z-index: 100;
       }
       #hud h1 { font-size: 14px; margin: 0 0 8px; font-weight: 600; }
-      .row { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
+      .row { display: flex; align-items: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
       .row label { font-size: 12px; opacity: 0.9; min-width: 120px; }
-      input[type="range"] { width: 260px; }
+      input[type="range"] { width: 200px; }
       .pill { font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid rgba(148,163,184,0.25); background: rgba(2,6,23,0.35); }
       a { color: #93c5fd; }
       #status { font-size: 12px; opacity: 0.85; margin-top: 6px; }
+      #stressLegend { margin-top: 8px; display: none; }
       code { background: rgba(2,6,23,0.5); padding: 1px 6px; border-radius: 6px; }
+      .legend-row { display: flex; align-items: center; gap: 8px; }
     </style>
   </head>
   <body>
@@ -37,9 +40,11 @@
         <span id="scaleVal" class="pill">20×</span>
       </div>
       <div class="row">
-        <label><input id="showUndeformed" type="checkbox" checked /> Show undeformed</label>
-        <label><input id="showDeformed" type="checkbox" checked /> Show deformed</label>
+        <label><input id="showUndeformed" type="checkbox" checked /> Undeformed</label>
+        <label><input id="showDeformed" type="checkbox" checked /> Deformed</label>
+        <label class="legend-row"><input id="showStressLegend" type="checkbox" checked /> Stress legend</label>
       </div>
+      <div id="stressLegend"></div>
       <div id="status">
         Loads <code>model.json</code>. If you opened this from disk and it fails to load, serve it:
         <code>python3 -m http.server</code>
@@ -48,4 +53,3 @@
     <script type="module" src="./viewer.js"></script>
   </body>
 </html>
-
