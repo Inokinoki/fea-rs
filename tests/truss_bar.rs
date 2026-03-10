@@ -970,3 +970,86 @@ fn test_beam_element_length_various_orientations() {
     assert_relative_eq!(dir[0], 0.6, epsilon = 1e-12);
     assert_relative_eq!(dir[1], 0.8, epsilon = 1e-12);
 }
+
+// =============================================================================
+// Visualization Enhancement Tests
+// =============================================================================
+
+#[test]
+fn test_vtk_writer_includes_displacement_magnitude() -> anyhow::Result<()> {
+    let mut model = Model::new();
+    let n0 = model.add_node(Node::new_2d(0.0, 0.0));
+    let n1 = model.add_node(Node::new_2d(1.0, 0.0));
+    model.add_element(Truss2::new(n0, n1, 210e9, 1e-4));
+    model.build_dofs_3d();
+
+    // Set known displacements
+    let mut u = vec![0.0; 6];
+    u[3] = 0.003; // n1 Ux
+    u[4] = 0.004; // n1 Uy
+
+    let temp_path = "/tmp/test_vtk_disp_mag.vtk";
+    let writer = VtkLegacyWriter::new();
+    writer.write_truss2(temp_path, &model, &u)?;
+
+    let content = std::fs::read_to_string(temp_path)?;
+
+    // Verify displacement_magnitude section exists
+    assert!(content.contains("displacement_magnitude"), "VTK should include displacement_magnitude");
+
+    // Verify magnitude values are present
+    assert!(content.contains("0.005"), "Should contain magnitude 0.005 (sqrt(0.003^2 + 0.004^2))");
+
+    std::fs::remove_file(temp_path)?;
+    Ok(())
+}
+
+#[test]
+fn test_json_enhanced_includes_displacement_magnitude() -> anyhow::Result<()> {
+    let mut model = Model::new();
+    let n0 = model.add_node(Node::new_2d(0.0, 0.0));
+    let n1 = model.add_node(Node::new_2d(1.0, 0.0));
+    model.add_element(Truss2::new(n0, n1, 210e9, 1e-4));
+    model.build_dofs_3d();
+
+    let mut u = vec![0.0; 6];
+    u[3] = 0.003; // n1 Ux
+    u[4] = 0.004; // n1 Uy
+
+    let temp_path = "/tmp/test_json_enhanced_mag.json";
+    let writer = JsonWriter::new();
+    let config = VizConfig::default();
+    writer.write_truss2_enhanced(temp_path, &model, &u, &config)?;
+
+    let content = std::fs::read_to_string(temp_path)?;
+    let json: serde_json::Value = serde_json::from_str(&content)?;
+
+    // Verify displacement_magnitude field exists
+    assert!(json["undeformed"]["point_data"].get("displacement_magnitude").is_some());
+    assert!(json["deformed"]["point_data"].get("displacement_magnitude").is_some());
+
+    // Verify magnitude values
+    let mag = &json["undeformed"]["point_data"]["displacement_magnitude"];
+    assert_relative_eq!(mag[0].as_f64().unwrap(), 0.0, epsilon = 1e-15);
+    assert_relative_eq!(mag[1].as_f64().unwrap(), 0.005, epsilon = 1e-15); // sqrt(0.003^2 + 0.004^2)
+
+    std::fs::remove_file(temp_path)?;
+    Ok(())
+}
+
+#[test]
+fn test_viz_config_auto_scale() {
+    let mut model = Model::new();
+    let n0 = model.add_node(Node::new_2d(0.0, 0.0));
+    let n1 = model.add_node(Node::new_2d(2.0, 0.0));
+    model.add_element(Truss2::new(n0, n1, 210e9, 1e-4));
+    model.build_dofs_3d();
+
+    let u = vec![0.001; 6]; // All DOFs have 0.001 displacement
+
+    let config = VizConfig::with_auto_scale(&model, &u, 0.1);
+
+    // Scale should be computed to make max displacement 10% of model size
+    assert!(config.deformation_scale > 0.0);
+    assert!(config.deformation_scale < 1000.0); // Reasonable bounds
+}

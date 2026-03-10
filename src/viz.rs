@@ -222,6 +222,29 @@ impl VtkLegacyWriter {
             writeln!(w, "{}", s)?;
         }
 
+        // Point data: displacement magnitude
+        writeln!(w, "SCALARS displacement_magnitude float 1")?;
+        writeln!(w, "LOOKUP_TABLE default")?;
+        for nid in 0..model.nodes.len() {
+            let ux = model
+                .dof_index(nid, Dof::Ux)
+                .and_then(|i| u.get(i))
+                .copied()
+                .unwrap_or(0.0);
+            let uy = model
+                .dof_index(nid, Dof::Uy)
+                .and_then(|i| u.get(i))
+                .copied()
+                .unwrap_or(0.0);
+            let uz = model
+                .dof_index(nid, Dof::Uz)
+                .and_then(|i| u.get(i))
+                .copied()
+                .unwrap_or(0.0);
+            let mag = (ux * ux + uy * uy + uz * uz).sqrt();
+            writeln!(w, "{}", mag)?;
+        }
+
         w.flush()?;
         Ok(())
     }
@@ -385,6 +408,9 @@ pub struct JsonTruss2 {
 #[derive(Debug, Clone, Serialize)]
 pub struct JsonPointData {
     pub displacement: Vec<[f64; 3]>,
+    /// Displacement magnitude at each node.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub displacement_magnitude: Option<Vec<f64>>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -465,7 +491,10 @@ impl JsonWriter {
         let data = JsonTruss2 {
             points,
             cells,
-            point_data: JsonPointData { displacement },
+            point_data: JsonPointData {
+                displacement,
+                displacement_magnitude: None,
+            },
             cell_data: JsonCellData { axial_stress },
         };
 
@@ -515,8 +544,9 @@ impl JsonWriter {
             ]);
         }
 
-        // Displacement data
+        // Displacement data with magnitudes
         let mut displacement = Vec::with_capacity(model.nodes.len());
+        let mut displacement_magnitude = Vec::with_capacity(model.nodes.len());
         for nid in 0..model.nodes.len() {
             let ux = model
                 .dof_index(nid, Dof::Ux)
@@ -534,6 +564,7 @@ impl JsonWriter {
                 .copied()
                 .unwrap_or(0.0);
             displacement.push([ux, uy, uz]);
+            displacement_magnitude.push((ux * ux + uy * uy + uz * uz).sqrt());
         }
 
         // Stress data with statistics
@@ -551,22 +582,23 @@ impl JsonWriter {
             .fold(f64::INFINITY, |a, &b| a.min(b));
 
         // Max displacement
-        let max_disp: f64 = displacement
-            .iter()
-            .fold(0.0_f64, |a, v| a.max((v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt()));
+        let max_disp = displacement_magnitude.iter().copied().fold(0.0_f64, f64::max);
+
+        let point_data = JsonPointData {
+            displacement: displacement.clone(),
+            displacement_magnitude: Some(displacement_magnitude),
+        };
 
         let data = JsonTruss2Enhanced {
             undeformed: JsonGeometry {
                 points: undeformed_points,
                 cells: cells.clone(),
-                point_data: JsonPointData {
-                    displacement: displacement.clone(),
-                },
+                point_data: point_data.clone(),
             },
             deformed: JsonGeometry {
                 points: deformed_points,
                 cells,
-                point_data: JsonPointData { displacement },
+                point_data,
             },
             cell_data: JsonCellData { axial_stress },
             metadata: JsonMetadata {
