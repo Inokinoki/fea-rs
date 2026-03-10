@@ -88,6 +88,76 @@ impl ConvergenceHistory {
 
         w.flush()
     }
+
+    /// Exports convergence plot as SVG.
+    pub fn write_svg<P: AsRef<Path>>(&self, path: P) -> std::io::Result<()> {
+        if self.residual_norms.is_empty() {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::InvalidData,
+                "No convergence data to plot"
+            ));
+        }
+
+        let width: f64 = 600.0;
+        let height: f64 = 400.0;
+        let margin: f64 = 50.0;
+        let plot_width: f64 = width - 2.0 * margin;
+        let plot_height: f64 = height - 2.0 * margin;
+
+        let file = File::create(path)?;
+        let mut w = BufWriter::new(file);
+
+        // SVG header
+        writeln!(w, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>")?;
+        writeln!(w, "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 {} {}\">", width, height)?;
+        writeln!(w, "  <rect width=\"100%\" height=\"100%\" fill=\"#0b0f14\"/>")?;
+
+        // Compute scales
+        let n = self.residual_norms.len();
+        let x_max = (n as f64) - 1.0;
+        let log_residuals: Vec<f64> = self.residual_norms.iter()
+            .map(|&r| if r > 0.0 { r.log10() } else { -15.0 })
+            .collect();
+        let y_min = log_residuals.iter().cloned().fold(f64::INFINITY, f64::min);
+        let y_max = log_residuals.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
+        let y_range = (y_max - y_min).max(1.0);
+
+        // Grid lines
+        writeln!(w, "  <g stroke=\"#334155\" stroke-width=\"1\" opacity=\"0.5\">")?;
+        for i in 0..5 {
+            let y = margin + (i as f64 / 4.0) * plot_height;
+            writeln!(w, "    <line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\"/>",
+                margin, y, width - margin, y)?;
+        }
+        writeln!(w, "  </g>")?;
+
+        // Convergence line
+        let mut path_d = String::new();
+        for (i, &log_r) in log_residuals.iter().enumerate() {
+            let x = margin + (i as f64 / x_max.max(1.0)) * plot_width;
+            let y = margin + plot_height - ((log_r - y_min) / y_range) * plot_height;
+            if i == 0 {
+                path_d.push_str(&format!("M {},{}", x, y));
+            } else {
+                path_d.push_str(&format!(" L {},{}", x, y));
+            }
+        }
+        writeln!(w, "  <path d=\"{}\" fill=\"none\" stroke=\"#4ade80\" stroke-width=\"2\"/>", path_d)?;
+
+        // Axis labels
+        writeln!(w, "  <text x=\"{}\" y=\"{}\" fill=\"#e6edf3\" font-size=\"14\" text-anchor=\"middle\">Iteration</text>",
+            width / 2.0, height - 10.0)?;
+        writeln!(w, "  <text x=\"20\" y=\"{}\" fill=\"#e6edf3\" font-size=\"14\" text-anchor=\"middle\" transform=\"rotate(-90, 20, {})\">log10(Residual)</text>",
+            height / 2.0, height / 2.0)?;
+
+        // Title
+        let status = if self.converged { "Converged" } else { "Not converged" };
+        writeln!(w, "  <text x=\"{}\" y=\"30\" fill=\"#4ade80\" font-size=\"16\" text-anchor=\"middle\">Convergence History ({})</text>",
+            width / 2.0, status)?;
+
+        writeln!(w, "</svg>")?;
+        w.flush()
+    }
 }
 
 /// Computes reaction forces from the solution.

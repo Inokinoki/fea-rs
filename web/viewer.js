@@ -9,6 +9,9 @@ const showUndeformedEl = document.getElementById('showUndeformed');
 const showDeformedEl = document.getElementById('showDeformed');
 const showStressLegendEl = document.getElementById('showStressLegend');
 const stressLegendEl = document.getElementById('stressLegend');
+const animateEl = document.getElementById('animate');
+const animSpeedEl = document.getElementById('animSpeed');
+const animSpeedValEl = document.getElementById('animSpeedVal');
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -39,6 +42,14 @@ scene.add(grid);
 const root = new THREE.Group();
 scene.add(root);
 
+// Modal animation state
+let modalData = null;
+let animating = false;
+let animTime = 0;
+let animSpeed = 1.0;
+let modeShape = null;
+let animId = null;
+
 function stressToColor(s, smin, smax) {
   // Diverging colormap: blue (compression) -> white -> red (tension)
   if (!Number.isFinite(s)) return new THREE.Color(0x93c5fd);
@@ -57,6 +68,16 @@ function stressToColor(s, smin, smax) {
   } else {
     return c_neutral.clone().lerp(c_tension, t);
   }
+}
+
+function frequencyToColor(f, fmin, fmax) {
+  // Rainbow colormap for frequency visualization
+  if (!Number.isFinite(f) || fmax <= fmin) return new THREE.Color(0x93c5fd);
+  const t = (f - fmin) / (fmax - fmin);
+
+  // HSV rainbow: red -> orange -> yellow -> green -> cyan -> blue -> violet
+  const hue = (1.0 - t) * 0.67; // blue to red
+  return new THREE.Color().setHSL(hue, 0.8, 0.5);
 }
 
 function createStressLegendTexture() {
@@ -102,19 +123,21 @@ function makeLine(a, b, color, linewidth = 1) {
 
 let undeformedGroup = null;
 let deformedGroup = null;
-let stressLegendMesh = null;
+let modeGroup = null;
 
 function buildScene(data, scale) {
   root.clear();
   undeformedGroup = new THREE.Group();
   deformedGroup = new THREE.Group();
+  modeGroup = new THREE.Group();
 
   // Handle both simple and enhanced JSON formats
   const points = data.points || data.undeformed?.points || [];
   const cells = data.cells || data.undeformed?.cells || [];
   const disp = data.point_data?.displacement || data.undeformed?.point_data?.displacement || [];
-  const stress = data.cell_data?.axial_stress || data.cell_data?.axial_stress || [];
+  const stress = data.cell_data?.axial_stress || [];
   const metadata = data.metadata || {};
+  const modes = data.modes || [];
 
   // Compute stress range
   const finiteStress = stress.filter(Number.isFinite);
@@ -157,35 +180,23 @@ function buildScene(data, scale) {
     deformedGroup.add(m);
   }
 
-  // Add undeformed nodes
+  // Add undeformed nodes (ghosted)
   for (let i = 0; i < points.length; i++) {
     const m = new THREE.Mesh(sphereGeom, sphereMat.clone());
-    m.material.opacity = 0.4;
+    m.material.opacity = 0.3;
     m.material.transparent = true;
     m.position.copy(p0(i));
     undeformedGroup.add(m);
   }
 
+  // Build mode shapes if available
+  if (modes && modes.length > 0) {
+    buildModeShapes(modes, cells, points, r, sphereGeom, sphereMat);
+  }
+
   root.add(undeformedGroup);
   root.add(deformedGroup);
-
-  // Update stress legend
-  if (stressLegendMesh) {
-    stressLegendEl.removeChild(stressLegendMesh);
-  }
-  if (showStressLegendEl.checked && finiteStress.length > 0) {
-    const legendCanvas = createStressLegendTexture();
-    const legendImg = document.createElement('img');
-    legendImg.src = legendCanvas.toDataURL();
-    legendImg.style.cssText = 'width: 200px; height: 25px; margin-top: 4px;';
-    stressLegendEl.innerHTML = '';
-    stressLegendEl.appendChild(legendImg);
-
-    const statsDiv = document.createElement('div');
-    statsDiv.style.cssText = 'font-size: 11px; margin-top: 4px; opacity: 0.8;';
-    statsDiv.innerHTML = `Stress: ${smin.toFixed(2)} to ${smax.toFixed(2)} Pa`;
-    stressLegendEl.appendChild(statsDiv);
-  }
+  root.add(modeGroup);
 
   // Frame camera
   const worldBox = new THREE.Box3().setFromObject(root);
@@ -200,14 +211,57 @@ function buildScene(data, scale) {
 
   // Update status with metadata if available
   if (metadata.num_nodes || metadata.num_elements) {
-    statusEl.innerHTML = `Nodes: <code>${metadata.num_nodes || points.length}</code> | Elements: <code>${metadata.num_elements || cells.length}</code> | Max disp: <code>${(metadata.max_displacement || 0).toExponential(2)}</code> m`;
+    statusEl.innerHTML = `Nodes: <code>${metadata.num_nodes || points.length}</code> | Elements: <code>${metadata.num_elements || cells.length}</code> | Max disp: <code>${(metadata.max_displacement || 0).toExponential(2)}</code> m${modes.length > 0 ? ` | Modes: <code>${modes.length}</code>` : ''}`;
   }
+}
+
+function buildModeShapes(modes, cells, points, nodeRadius, sphereGeom, sphereMat) {
+  if (!modes || modes.length === 0) return;
+
+  const fmin = Math.min(...modes.map(m => m.frequency));
+  const fmax = Math.max(...modes.map(m => m.frequency));
+
+  // Create a line for each mode shape
+  modes.forEach((mode, modeIdx) => {
+    const modeGroupInner = new THREE.Group();
+    const modeShape = mode.shape || [];
+    const freq = mode.frequency;
+    const color = frequencyToColor(freq, fmin, fmax);
+
+    // Draw mode shape at offset position
+    const yOffset = -2 - modeIdx * 0.5;
+
+    for (let ci = 0; ci < cells.length; ci++) {
+      const [i, j] = cells[ci];
+      const pi = new THREE.Vector3(points[i][0], points[i][1] + yOffset, points[i][2]);
+      const pj = new THREE.Vector3(points[j][0], points[j][1] + yOffset, points[j][2]);
+      modeGroupInner.add(makeLine(pi, pj, color));
+    }
+
+    // Add frequency label (as a point with color)
+    const labelMat = sphereMat.clone();
+    labelMat.color = color;
+    const labelSphere = new THREE.Mesh(sphereGeom, labelMat);
+    labelSphere.position.set(0, yOffset, 0);
+    modeGroupInner.add(labelSphere);
+
+    modeGroupInner.visible = false;
+    modeGroupInner.userData = { modeIndex: modeIdx, frequency: freq };
+    modeGroup.add(modeGroupInner);
+  });
 }
 
 function setVisibility() {
   if (undeformedGroup) undeformedGroup.visible = !!showUndeformedEl.checked;
   if (deformedGroup) deformedGroup.visible = !!showDeformedEl.checked;
   stressLegendEl.style.display = showStressLegendEl.checked ? 'block' : 'none';
+
+  // Show mode shapes only if animation is off or no mode selected
+  if (modeGroup) {
+    modeGroup.children.forEach((g, i) => {
+      g.visible = !animating && window.showModeCheckbox && window.showModeCheckbox[i]?.checked;
+    });
+  }
 }
 
 let currentData = null;
@@ -223,6 +277,11 @@ async function loadModel() {
     const scale = Number(scaleEl.value);
     buildScene(data, scale);
     setVisibility();
+
+    // Build mode checkboxes if modes exist
+    if (data.modes && data.modes.length > 0) {
+      buildModeControls(data.modes);
+    }
 
     // Rebuild deformed view on scale change
     scaleEl.addEventListener('input', () => {
@@ -243,6 +302,149 @@ async function loadModel() {
   } catch (e) {
     statusEl.textContent = `Failed to load model.json (${e}). Serve via: python3 -m http.server`;
     throw e;
+  }
+}
+
+function buildModeControls(modes) {
+  // Create mode selector in HUD
+  let modesDiv = document.getElementById('modesContainer');
+  if (!modesDiv) {
+    modesDiv = document.createElement('div');
+    modesDiv.id = 'modesContainer';
+    modesDiv.style.cssText = 'margin-top: 8px; border-top: 1px solid rgba(148,163,184,0.22); padding-top: 8px;';
+    document.querySelector('#hud .row:last-of-type').after(modesDiv);
+  }
+
+  modesDiv.innerHTML = '<div style="font-size:12px;margin-bottom:4px;">Mode shapes (click to visualize):</div>';
+
+  window.showModeCheckbox = [];
+  modes.forEach((mode, i) => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.style.margin = '4px 0';
+
+    const label = document.createElement('label');
+    label.style.cssText = 'display: flex; align-items: center; gap: 6px; font-size: 11px;';
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.onchange = () => {
+      if (modeGroup) {
+        modeGroup.children[i].visible = checkbox.checked;
+      }
+    };
+    window.showModeCheckbox.push(checkbox);
+
+    label.appendChild(checkbox);
+    label.appendChild(document.createTextNode(`Mode ${i + 1}: ${(mode.frequency / (2 * Math.PI)).toFixed(2)} Hz`));
+    row.appendChild(label);
+    modesDiv.appendChild(row);
+  });
+
+  // Add animate button
+  const animRow = document.createElement('div');
+  animRow.className = 'row';
+  animRow.innerHTML = `
+    <label><input id="animate" type="checkbox" /> Animate mode</label>
+    <input id="animSpeed" type="range" min="0.1" max="5" step="0.1" value="1" style="width:100px;" />
+    <span id="animSpeedVal" class="pill">1.0×</span>
+  `;
+  modesDiv.appendChild(animRow);
+
+  // Hook up animation controls
+  setTimeout(() => {
+    window.animateCheckbox = document.getElementById('animate');
+    const speedSlider = document.getElementById('animSpeed');
+
+    window.animateCheckbox?.addEventListener('change', (e) => {
+      animating = e.target.checked;
+      if (animating) {
+        startAnimation();
+      } else {
+        stopAnimation();
+      }
+    });
+
+    speedSlider?.addEventListener('input', (e) => {
+      animSpeed = parseFloat(e.target.value);
+      document.getElementById('animSpeedVal').textContent = `${animSpeed.toFixed(1)}×`;
+    });
+  }, 0);
+}
+
+function startAnimation() {
+  if (!currentData || !currentData.modes || currentData.modes.length === 0) return;
+
+  // Find first visible mode
+  const activeModeIdx = modeGroup?.children.findIndex(g => g.visible) ?? 0;
+  if (activeModeIdx < 0 || activeModeIdx >= currentData.modes.length) return;
+
+  modeShape = currentData.modes[activeModeIdx].shape;
+  if (!modeShape) return;
+
+  animTime = 0;
+  animateMode();
+}
+
+function animateMode() {
+  if (!animating || !modeShape || !currentData) return;
+
+  animTime += animSpeed * 0.05;
+  const scale = Math.sin(animTime) * 0.3; // Oscillate between -0.3 and 0.3
+
+  // Update deformed shape with modal displacement
+  const points = currentData.points || currentData.undeformed?.points || [];
+  const cells = currentData.cells || currentData.undeformed?.cells || [];
+
+  // Clear and rebuild deformed group with animated shape
+  if (deformedGroup) {
+    while(deformedGroup.children.length > 0) {
+      deformedGroup.remove(deformedGroup.children[0]);
+    }
+
+    const sphereGeom = new THREE.SphereGeometry(0.02, 14, 14);
+    const sphereMat = new THREE.MeshStandardMaterial({ color: 0x4ade80, roughness: 0.65, metalness: 0.0 });
+
+    // Draw mode shape
+    for (let ci = 0; ci < cells.length; ci++) {
+      const [i, j] = cells[ci];
+      const pi = new THREE.Vector3(
+        points[i][0] + scale * (modeShape[i*3] || 0),
+        points[i][1] + scale * (modeShape[i*3+1] || 0),
+        points[i][2] + scale * (modeShape[i*3+2] || 0)
+      );
+      const pj = new THREE.Vector3(
+        points[j][0] + scale * (modeShape[j*3] || 0),
+        points[j][1] + scale * (modeShape[j*3+1] || 0),
+        points[j][2] + scale * (modeShape[j*3+2] || 0)
+      );
+      deformedGroup.add(makeLine(pi, pj, 0x4ade80));
+    }
+
+    // Add nodes
+    for (let i = 0; i < points.length; i++) {
+      const m = new THREE.Mesh(sphereGeom, sphereMat);
+      m.position.set(
+        points[i][0] + scale * (modeShape[i*3] || 0),
+        points[i][1] + scale * (modeShape[i*3+1] || 0),
+        points[i][2] + scale * (modeShape[i*3+2] || 0)
+      );
+      deformedGroup.add(m);
+    }
+  }
+
+  animId = requestAnimationFrame(animateMode);
+}
+
+function stopAnimation() {
+  if (animId) {
+    cancelAnimationFrame(animId);
+    animId = null;
+  }
+  // Restore static deformed view
+  if (currentData) {
+    buildScene(currentData, Number(scaleEl.value));
+    setVisibility();
   }
 }
 

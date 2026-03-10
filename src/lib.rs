@@ -26,7 +26,7 @@ pub mod prelude {
     pub use crate::beam::{Beam2D, BeamModel};
     pub use crate::core::{BoundaryCondition, Dof, Load, Model, NodeId};
     pub use crate::elements::{Element, Truss2};
-    pub use crate::modal::{MassFormulation, ModalConfig, ModalResult, ModalSolver};
+    pub use crate::modal::{MassFormulation, ModalConfig, ModalJson, ModalMode, ModalResult, ModalSolver};
     pub use crate::postprocessing::{
         compute_reactions, extract_element_results, extract_nodal_displacements, CsvWriter,
         ElementResult, NodalDisplacement, ReactionForce, ResultStatistics,

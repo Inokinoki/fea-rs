@@ -4,11 +4,16 @@
 //! - Mass matrix formulation for truss elements
 //! - Eigenvalue solvers (Power iteration, Rayleigh quotient iteration)
 //! - Natural frequency and mode shape extraction
+//! - JSON export for web visualization
 
 use crate::core::{Dof, Model, NodeId};
 use crate::elements::{Element, Truss2};
 use nalgebra::{DMatrix, DVector};
+use serde::Serialize;
 use std::collections::BTreeSet;
+use std::fs::File;
+use std::io::{BufWriter, Write};
+use std::path::Path;
 
 /// Result of a modal analysis.
 #[derive(Debug, Clone)]
@@ -19,6 +24,59 @@ pub struct ModalResult {
     pub mode_shapes: Vec<Vec<f64>>,
     /// Number of iterations for each mode.
     pub iterations: Vec<usize>,
+}
+
+/// A single mode shape for JSON export.
+#[derive(Debug, Clone, Serialize)]
+pub struct ModalMode {
+    /// Mode number (1-indexed).
+    pub mode: usize,
+    /// Natural frequency in rad/s.
+    pub frequency: f64,
+    /// Natural frequency in Hz.
+    pub frequency_hz: f64,
+    /// Mode shape vector (nodal displacements).
+    pub shape: Vec<f64>,
+}
+
+/// Modal analysis result for JSON export.
+#[derive(Debug, Clone, Serialize)]
+pub struct ModalJson {
+    /// Number of modes.
+    pub num_modes: usize,
+    /// Mode shapes with frequencies.
+    pub modes: Vec<ModalMode>,
+}
+
+impl ModalResult {
+    /// Converts modal result to JSON-serializable format.
+    pub fn to_json(&self) -> ModalJson {
+        let modes = self.frequencies.iter()
+            .zip(self.mode_shapes.iter())
+            .enumerate()
+            .map(|(i, (&freq, shape))| ModalMode {
+                mode: i + 1,
+                frequency: freq,
+                frequency_hz: freq / (2.0 * std::f64::consts::PI),
+                shape: shape.clone(),
+            })
+            .collect();
+
+        ModalJson {
+            num_modes: self.frequencies.len(),
+            modes,
+        }
+    }
+
+    /// Exports modal results to a JSON file for web visualization.
+    pub fn write_json<P: AsRef<Path>>(&self, path: P) -> std::io::Result<()> {
+        let json = self.to_json();
+        let file = File::create(path)?;
+        let mut w = BufWriter::new(file);
+        serde_json::to_writer_pretty(&mut w, &json)
+            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
+        w.flush()
+    }
 }
 
 /// Mass matrix type for dynamic analysis.
