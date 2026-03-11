@@ -9,6 +9,7 @@
 //! - Iterative solvers with acceleration techniques
 //! - Result post-processing and CSV export
 //! - Material property presets
+//! - Parametric study and batch processing
 //!
 //! The API is intentionally small and composable. It will expand over time.
 
@@ -17,6 +18,7 @@ pub mod core;
 pub mod elements;
 pub mod materials;
 pub mod modal;
+pub mod parametric;
 pub mod postprocessing;
 pub mod solver;
 pub mod solvers;
@@ -30,6 +32,11 @@ pub mod prelude {
     pub use crate::elements::{Element, Truss2};
     pub use crate::materials::{Material, STEEL_A36, ALUMINUM_6061_T6};
     pub use crate::modal::{MassFormulation, ModalConfig, ModalJson, ModalMode, ModalResult, ModalSolver};
+    pub use crate::parametric::{
+        export_batch_results_csv, export_parametric_results_csv, run_batch_analysis,
+        BatchResult, LoadCase, ParametricRunResult, ParametricStudy, ParametricStudyResult,
+        ParametricVariable,
+    };
     pub use crate::postprocessing::{
         compute_reactions, extract_element_results, extract_nodal_displacements, CsvWriter,
         ElementResult, NodalDisplacement, ReactionForce, ResultStatistics,

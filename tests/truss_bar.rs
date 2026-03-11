@@ -1053,3 +1053,206 @@ fn test_viz_config_auto_scale() {
     assert!(config.deformation_scale > 0.0);
     assert!(config.deformation_scale < 1000.0); // Reasonable bounds
 }
+
+// =============================================================================
+// Edge Case Tests
+// =============================================================================
+
+#[test]
+fn test_single_element_zero_length() {
+    // Two nodes at same location should not crash
+    let mut model = Model::new();
+    let n0 = model.add_node(Node::new_2d(1.0, 1.0));
+    let n1 = model.add_node(Node::new_2d(1.0, 1.0)); // Same location
+    model.add_element(Truss2::new(n0, n1, 210e9, 1e-4));
+
+    for dof in [Dof::Ux, Dof::Uy, Dof::Uz] {
+        model.add_bc(BoundaryCondition { node: n0, dof, value: 0.0 });
+        model.add_bc(BoundaryCondition { node: n1, dof, value: 0.0 });
+    }
+
+    let solver = LinearStaticSolver::new();
+    let result = solver.solve_truss2(&mut model);
+
+    // Should handle gracefully (may fail or return zeros)
+    // Just verify no panic
+    let _ = result.is_ok() || result.is_err();
+}
+
+#[test]
+fn test_large_load_value() {
+    // Very large load should not cause overflow/panic
+    let mut model = Model::new();
+    let n0 = model.add_node(Node::new_2d(0.0, 0.0));
+    let n1 = model.add_node(Node::new_2d(1.0, 0.0));
+    model.add_element(Truss2::new(n0, n1, 210e9, 1e-4));
+
+    for dof in [Dof::Ux, Dof::Uy, Dof::Uz] {
+        model.add_bc(BoundaryCondition { node: n0, dof, value: 0.0 });
+    }
+    for dof in [Dof::Uy, Dof::Uz] {
+        model.add_bc(BoundaryCondition { node: n1, dof, value: 0.0 });
+    }
+
+    // Very large load (1 MN)
+    model.add_load(Load { node: n1, dof: Dof::Ux, value: 1e6 });
+
+    let solver = LinearStaticSolver::new();
+    let result = solver.solve_truss2(&mut model);
+
+    assert!(result.is_ok());
+    let r = result.unwrap();
+
+    // Displacement should be finite
+    for &disp in &r.u {
+        assert!(disp.is_finite());
+    }
+}
+
+#[test]
+fn test_very_small_cross_section() {
+    // Very small cross-section should produce large displacement
+    let mut model = Model::new();
+    let n0 = model.add_node(Node::new_2d(0.0, 0.0));
+    let n1 = model.add_node(Node::new_2d(1.0, 0.0));
+    model.add_element(Truss2::new(n0, n1, 210e9, 1e-10)); // Very small area
+
+    for dof in [Dof::Ux, Dof::Uy, Dof::Uz] {
+        model.add_bc(BoundaryCondition { node: n0, dof, value: 0.0 });
+    }
+    for dof in [Dof::Uy, Dof::Uz] {
+        model.add_bc(BoundaryCondition { node: n1, dof, value: 0.0 });
+    }
+    model.add_load(Load { node: n1, dof: Dof::Ux, value: 100.0 });
+
+    let solver = LinearStaticSolver::new();
+    let result = solver.solve_truss2(&mut model).unwrap();
+
+    let u1 = result.u[model.dof_index(n1, Dof::Ux).unwrap()];
+    // Should be large but finite
+    assert!(u1.is_finite());
+    assert!(u1 > 0.01); // Much larger than typical
+}
+
+#[test]
+fn test_floating_point_node_coordinates() {
+    // Test with various floating point coordinate patterns
+    let mut model = Model::new();
+    let n0 = model.add_node(Node::new_2d(0.0, 0.0));
+    let n1 = model.add_node(Node::new_2d(1.0 / 3.0, 0.0)); // Repeating decimal
+    let n2 = model.add_node(Node::new_2d(std::f64::consts::PI, 0.0)); // Irrational
+
+    model.add_element(Truss2::new(n0, n1, 210e9, 1e-4));
+    model.add_element(Truss2::new(n1, n2, 210e9, 1e-4));
+
+    for dof in [Dof::Ux, Dof::Uy, Dof::Uz] {
+        model.add_bc(BoundaryCondition { node: n0, dof, value: 0.0 });
+    }
+    // Constrain n1 in Y and Z to prevent mechanism
+    for dof in [Dof::Uy, Dof::Uz] {
+        model.add_bc(BoundaryCondition { node: n1, dof, value: 0.0 });
+    }
+    for dof in [Dof::Ux, Dof::Uy, Dof::Uz] {
+        model.add_bc(BoundaryCondition { node: n2, dof, value: 0.0 });
+    }
+    model.add_load(Load { node: n1, dof: Dof::Ux, value: 100.0 });
+
+    let solver = LinearStaticSolver::new();
+    let result = solver.solve_truss2(&mut model);
+
+    // Should solve successfully with floating point coordinates
+    if let Ok(r) = result {
+        // All displacements should be finite
+        for &disp in &r.u {
+            assert!(disp.is_finite());
+        }
+    }
+    // Or return an error gracefully - both are acceptable
+}
+
+#[test]
+fn test_all_dofs_constrained() {
+    // When all DOFs are constrained, solution should be zero
+    let mut model = Model::new();
+    let n0 = model.add_node(Node::new_2d(0.0, 0.0));
+    let n1 = model.add_node(Node::new_2d(1.0, 0.0));
+    model.add_element(Truss2::new(n0, n1, 210e9, 1e-4));
+
+    // Constrain everything
+    for &n in &[n0, n1] {
+        for dof in [Dof::Ux, Dof::Uy, Dof::Uz] {
+            model.add_bc(BoundaryCondition { node: n, dof, value: 0.0 });
+        }
+    }
+    model.add_load(Load { node: n1, dof: Dof::Ux, value: 100.0 });
+
+    let solver = LinearStaticSolver::new();
+    let result = solver.solve_truss2(&mut model).unwrap();
+
+    // All displacements should be zero
+    for &disp in &result.u {
+        assert!((disp - 0.0).abs() < 1e-15);
+    }
+}
+
+#[test]
+fn test_empty_model_handling() {
+    // Empty model should handle gracefully (may return empty result or error)
+    let mut model: Model<Truss2> = Model::new();
+    let solver = LinearStaticSolver::new();
+    let result = solver.solve_truss2(&mut model);
+
+    // Either error or empty result is acceptable - just verify no panic
+    match result {
+        Ok(r) => {
+            // If successful, displacements should be empty
+            assert!(r.u.is_empty() || r.u.iter().all(|&x| x == 0.0));
+        }
+        Err(_) => {
+            // Error is also acceptable
+        }
+    }
+}
+
+#[test]
+fn test_unconstrained_model_returns_error() {
+    // Model with no constraints should fail (singular matrix)
+    let mut model = Model::new();
+    let n0 = model.add_node(Node::new_2d(0.0, 0.0));
+    let n1 = model.add_node(Node::new_2d(1.0, 0.0));
+    model.add_element(Truss2::new(n0, n1, 210e9, 1e-4));
+    // No boundary conditions!
+    model.add_load(Load { node: n1, dof: Dof::Ux, value: 100.0 });
+
+    let solver = LinearStaticSolver::new();
+    let result = solver.solve_truss2(&mut model);
+
+    // Should return error for singular matrix
+    assert!(result.is_err());
+}
+
+#[test]
+fn test_nodal_load_sum_equals_reaction() {
+    // Verify equilibrium: sum of reactions = sum of applied loads
+    let mut model = Model::new();
+    let n0 = model.add_node(Node::new_2d(0.0, 0.0));
+    let n1 = model.add_node(Node::new_2d(2.0, 0.0));
+    model.add_element(Truss2::new(n0, n1, 210e9, 1e-4));
+
+    for dof in [Dof::Ux, Dof::Uy, Dof::Uz] {
+        model.add_bc(BoundaryCondition { node: n0, dof, value: 0.0 });
+    }
+    for dof in [Dof::Uy, Dof::Uz] {
+        model.add_bc(BoundaryCondition { node: n1, dof, value: 0.0 });
+    }
+
+    let load_value = 5000.0;
+    model.add_load(Load { node: n1, dof: Dof::Ux, value: load_value });
+
+    let solver = LinearStaticSolver::new();
+    let result = solver.solve_truss2(&mut model).unwrap();
+
+    // Sum of reactions in X should equal applied load
+    let reaction_sum: f64 = result.reactions.values().sum();
+    assert!((reaction_sum + load_value).abs() < 1e-6); // reaction is negative
+}
