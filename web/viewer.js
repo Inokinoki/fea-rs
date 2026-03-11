@@ -1,5 +1,5 @@
-import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-import { OrbitControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+import * as THREE from 'https://esm.sh/three@0.160.0/build/three.module.js';
+import { OrbitControls } from 'https://esm.sh/three@0.160.0/examples/jsm/controls/OrbitControls.js';
 
 const app = document.getElementById('app');
 const statusEl = document.getElementById('status');
@@ -124,12 +124,14 @@ function makeLine(a, b, color, linewidth = 1) {
 let undeformedGroup = null;
 let deformedGroup = null;
 let modeGroup = null;
+let animationGroup = null;
 
 function buildScene(data, scale) {
   root.clear();
   undeformedGroup = new THREE.Group();
   deformedGroup = new THREE.Group();
   modeGroup = new THREE.Group();
+  animationGroup = new THREE.Group();
 
   // Handle both simple and enhanced JSON formats
   const points = data.points || data.undeformed?.points || [];
@@ -197,6 +199,7 @@ function buildScene(data, scale) {
   root.add(undeformedGroup);
   root.add(deformedGroup);
   root.add(modeGroup);
+  root.add(animationGroup);
 
   // Frame camera
   const worldBox = new THREE.Box3().setFromObject(root);
@@ -221,15 +224,19 @@ function buildModeShapes(modes, cells, points, nodeRadius, sphereGeom, sphereMat
   const fmin = Math.min(...modes.map(m => m.frequency));
   const fmax = Math.max(...modes.map(m => m.frequency));
 
-  // Create a line for each mode shape
+  // Store mode shapes for animation
+  window.modeShapes = modes.map(m => m.shape || []);
+  window.modeFrequencies = modes.map(m => m.frequency);
+
+  // Create a line for each mode shape (displayed below main model)
   modes.forEach((mode, modeIdx) => {
     const modeGroupInner = new THREE.Group();
     const modeShape = mode.shape || [];
     const freq = mode.frequency;
     const color = frequencyToColor(freq, fmin, fmax);
 
-    // Draw mode shape at offset position
-    const yOffset = -2 - modeIdx * 0.5;
+    // Draw mode shape at offset position (below main model)
+    const yOffset = -1.5 - modeIdx * 0.4;
 
     for (let ci = 0; ci < cells.length; ci++) {
       const [i, j] = cells[ci];
@@ -238,7 +245,7 @@ function buildModeShapes(modes, cells, points, nodeRadius, sphereGeom, sphereMat
       modeGroupInner.add(makeLine(pi, pj, color));
     }
 
-    // Add frequency label (as a point with color)
+    // Add frequency indicator
     const labelMat = sphereMat.clone();
     labelMat.color = color;
     const labelSphere = new THREE.Mesh(sphereGeom, labelMat);
@@ -249,6 +256,8 @@ function buildModeShapes(modes, cells, points, nodeRadius, sphereGeom, sphereMat
     modeGroupInner.userData = { modeIndex: modeIdx, frequency: freq };
     modeGroup.add(modeGroupInner);
   });
+
+  console.log(`Built ${modes.length} mode shape visualizations`);
 }
 
 function setVisibility() {
@@ -273,6 +282,18 @@ async function loadModel() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     currentData = data;
+
+    // Try to load mode shapes from modes.json
+    try {
+      const modesRes = await fetch('./modes.json', { cache: 'no-store' });
+      if (modesRes.ok) {
+        const modesData = await modesRes.json();
+        data.modes = modesData.modes || [];
+        console.log(`Loaded ${data.modes.length} mode shapes`);
+      }
+    } catch (e) {
+      console.log('No modes.json found, static view only');
+    }
 
     const scale = Number(scaleEl.value);
     buildScene(data, scale);
@@ -312,7 +333,8 @@ function buildModeControls(modes) {
     modesDiv = document.createElement('div');
     modesDiv.id = 'modesContainer';
     modesDiv.style.cssText = 'margin-top: 8px; border-top: 1px solid rgba(148,163,184,0.22); padding-top: 8px;';
-    document.querySelector('#hud .row:last-of-type').after(modesDiv);
+    // Append to #hud instead of using .after()
+    document.getElementById('hud').appendChild(modesDiv);
   }
 
   modesDiv.innerHTML = '<div style="font-size:12px;margin-bottom:4px;">Mode shapes (click to visualize):</div>';
@@ -375,9 +397,21 @@ function buildModeControls(modes) {
 function startAnimation() {
   if (!currentData || !currentData.modes || currentData.modes.length === 0) return;
 
-  // Find first visible mode
-  const activeModeIdx = modeGroup?.children.findIndex(g => g.visible) ?? 0;
-  if (activeModeIdx < 0 || activeModeIdx >= currentData.modes.length) return;
+  // Find first visible mode, or select the first one
+  let activeModeIdx = modeGroup?.children.findIndex(g => g.visible) ?? -1;
+
+  // If no mode is visible, select the first one
+  if (activeModeIdx < 0 || activeModeIdx >= currentData.modes.length) {
+    activeModeIdx = 0;
+    // Make first mode visible
+    if (modeGroup && modeGroup.children[0]) {
+      modeGroup.children[0].visible = true;
+    }
+    // Check the first checkbox if it exists
+    if (window.showModeCheckbox && window.showModeCheckbox[0]) {
+      window.showModeCheckbox[0].checked = true;
+    }
+  }
 
   modeShape = currentData.modes[activeModeIdx].shape;
   if (!modeShape) return;
@@ -390,47 +424,45 @@ function animateMode() {
   if (!animating || !modeShape || !currentData) return;
 
   animTime += animSpeed * 0.05;
-  const scale = Math.sin(animTime) * 0.3; // Oscillate between -0.3 and 0.3
+  const scale = Math.sin(animTime) * 0.5; // Oscillate amplitude
 
-  // Update deformed shape with modal displacement
+  // Update animation group with modal displacement
   const points = currentData.points || currentData.undeformed?.points || [];
   const cells = currentData.cells || currentData.undeformed?.cells || [];
 
-  // Clear and rebuild deformed group with animated shape
-  if (deformedGroup) {
-    while(deformedGroup.children.length > 0) {
-      deformedGroup.remove(deformedGroup.children[0]);
-    }
+  // Clear and rebuild animation group
+  while(animationGroup.children.length > 0) {
+    animationGroup.remove(animationGroup.children[0]);
+  }
 
-    const sphereGeom = new THREE.SphereGeometry(0.02, 14, 14);
-    const sphereMat = new THREE.MeshStandardMaterial({ color: 0x4ade80, roughness: 0.65, metalness: 0.0 });
+  const sphereGeom = new THREE.SphereGeometry(0.03, 14, 14);
+  const sphereMat = new THREE.MeshStandardMaterial({ color: 0x4ade80, roughness: 0.65, metalness: 0.0 });
 
-    // Draw mode shape
-    for (let ci = 0; ci < cells.length; ci++) {
-      const [i, j] = cells[ci];
-      const pi = new THREE.Vector3(
-        points[i][0] + scale * (modeShape[i*3] || 0),
-        points[i][1] + scale * (modeShape[i*3+1] || 0),
-        points[i][2] + scale * (modeShape[i*3+2] || 0)
-      );
-      const pj = new THREE.Vector3(
-        points[j][0] + scale * (modeShape[j*3] || 0),
-        points[j][1] + scale * (modeShape[j*3+1] || 0),
-        points[j][2] + scale * (modeShape[j*3+2] || 0)
-      );
-      deformedGroup.add(makeLine(pi, pj, 0x4ade80));
-    }
+  // Draw animated mode shape
+  for (let ci = 0; ci < cells.length; ci++) {
+    const [i, j] = cells[ci];
+    const pi = new THREE.Vector3(
+      points[i][0] + scale * (modeShape[i*3] || 0),
+      points[i][1] + scale * (modeShape[i*3+1] || 0),
+      points[i][2] + scale * (modeShape[i*3+2] || 0)
+    );
+    const pj = new THREE.Vector3(
+      points[j][0] + scale * (modeShape[j*3] || 0),
+      points[j][1] + scale * (modeShape[j*3+1] || 0),
+      points[j][2] + scale * (modeShape[j*3+2] || 0)
+    );
+    animationGroup.add(makeLine(pi, pj, 0x4ade80));
+  }
 
-    // Add nodes
-    for (let i = 0; i < points.length; i++) {
-      const m = new THREE.Mesh(sphereGeom, sphereMat);
-      m.position.set(
-        points[i][0] + scale * (modeShape[i*3] || 0),
-        points[i][1] + scale * (modeShape[i*3+1] || 0),
-        points[i][2] + scale * (modeShape[i*3+2] || 0)
-      );
-      deformedGroup.add(m);
-    }
+  // Add nodes
+  for (let i = 0; i < points.length; i++) {
+    const m = new THREE.Mesh(sphereGeom, sphereMat);
+    m.position.set(
+      points[i][0] + scale * (modeShape[i*3] || 0),
+      points[i][1] + scale * (modeShape[i*3+1] || 0),
+      points[i][2] + scale * (modeShape[i*3+2] || 0)
+    );
+    animationGroup.add(m);
   }
 
   animId = requestAnimationFrame(animateMode);
@@ -441,10 +473,13 @@ function stopAnimation() {
     cancelAnimationFrame(animId);
     animId = null;
   }
-  // Restore static deformed view
-  if (currentData) {
-    buildScene(currentData, Number(scaleEl.value));
-    setVisibility();
+  animating = false;
+
+  // Clear animation group
+  if (animationGroup) {
+    while(animationGroup.children.length > 0) {
+      animationGroup.remove(animationGroup.children[0]);
+    }
   }
 }
 
