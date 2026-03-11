@@ -1,0 +1,10 @@
+/target
+Cargo.lock
+*.vtk
+*.vtu
+*.pvtu
+.DS_Store
+
+out/
+web/model.json
+*.json
