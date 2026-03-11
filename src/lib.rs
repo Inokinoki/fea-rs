@@ -8,12 +8,14 @@
 //! - Simple VTK export for visualization (ParaView)
 //! - Iterative solvers with acceleration techniques
 //! - Result post-processing and CSV export
+//! - Material property presets
 //!
 //! The API is intentionally small and composable. It will expand over time.
 
 pub mod beam;
 pub mod core;
 pub mod elements;
+pub mod materials;
 pub mod modal;
 pub mod postprocessing;
 pub mod solver;
@@ -26,6 +28,7 @@ pub mod prelude {
     pub use crate::beam::{Beam2D, BeamModel};
     pub use crate::core::{BoundaryCondition, Dof, Load, Model, NodeId};
     pub use crate::elements::{Element, Truss2};
+    pub use crate::materials::{Material, STEEL_A36, ALUMINUM_6061_T6};
     pub use crate::modal::{MassFormulation, ModalConfig, ModalJson, ModalMode, ModalResult, ModalSolver};
     pub use crate::postprocessing::{
         compute_reactions, extract_element_results, extract_nodal_displacements, CsvWriter,

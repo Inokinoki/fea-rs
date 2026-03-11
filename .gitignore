@@ -5,3 +5,6 @@ Cargo.lock
 *.pvtu
 .DS_Store
 
+out/
+web/model.json
+*.json
