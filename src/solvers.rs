@@ -5,7 +5,7 @@
 //! - Sparse matrix support for large-scale problems
 
 use crate::core::{BoundaryCondition, Dof, Load, Model, NodeId};
-use crate::elements::{Element, Truss2};
+use crate::elements_legacy::{ElementOld as Element, Truss2};
 use nalgebra::{DMatrix, DVector};
 use std::collections::{BTreeMap, BTreeSet};
 

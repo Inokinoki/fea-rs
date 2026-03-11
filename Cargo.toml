@@ -17,5 +17,32 @@ serde_json = "1"
 approx = "0.5"
 
 [features]
-default = []
+# Default features - standard analysis capabilities
+default = ["static", "modal", "solver-direct", "element-truss"]
 
+# Analysis types
+static = []
+modal = []
+buckling = []
+dynamic = ["modal"]
+harmonic = ["modal"]
+
+# Solvers
+solver-direct = []
+solver-iterative = []
+solver-eigen = []
+
+# Elements
+element-truss = []
+element-beam = []
+element-plate = []
+element-solid = []
+
+# Nonlinear analysis
+nonlinear-geometric = []
+nonlinear-material = []
+
+# Full feature sets
+minimal = ["static", "solver-direct", "element-truss"]
+standard = ["static", "modal", "solver-direct", "solver-iterative", "element-truss", "element-beam"]
+full = ["static", "modal", "buckling", "dynamic", "solver-direct", "solver-iterative", "solver-eigen", "element-truss", "element-beam", "element-plate", "nonlinear-geometric"]
