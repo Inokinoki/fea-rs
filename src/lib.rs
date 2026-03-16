@@ -288,10 +288,12 @@ pub mod prelude {
     };
 
     // Contact Analysis
-    pub use crate::algorithms::contact_enhanced::{
-        ContactPair, ContactDetection, ContactMethod, ContactParameters,
-        NodeToSurfaceContact, PenaltyContact, AugmentedLagrangianContact,
-        MortarContact, ContactConstraintHandler,
+    pub use crate::algorithms::contact::{
+        ContactType, FrictionModel, ContactPair, ContactDetection,
+        ContactMethod, ContactDetectionResult,
+        CoulombFrictionModel, ContactState, FrictionalContactConstraint,
+        PenaltyFrictionSolver, AugmentedLagrangianFrictionSolver,
+        NodeToSurfaceDetection,
     };
 
     // Dynamic Analysis Acceleration
