@@ -15,6 +15,7 @@ pub mod explicit_dynamics;
 pub mod amr;
 pub mod contact_enhanced;
 pub mod dynamics_accel;
+pub mod coupling;
 
 pub use solvers::{Solver, SolverResult};
 pub use analysis::{Analysis, AnalysisResult};

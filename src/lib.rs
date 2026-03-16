@@ -302,6 +302,12 @@ pub mod prelude {
         ProperOrthogonalDecomposition, KrylovReduction,
     };
 
+    // Multiphysics Coupling
+    pub use crate::algorithms::coupling::{
+        ThermalExpansionTensor, TemperatureDependentProperties,
+        ThermalStressSolver, ThermalContactModifier,
+    };
+
     // Benchmarks
     pub use crate::benchmarks::{
         NafemsLe1, NafemsLe1Result,
