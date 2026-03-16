@@ -11,6 +11,7 @@ pub mod analysis;
 pub mod nonlinear;
 pub mod thermal;
 pub mod contact;
+pub mod contact_advanced;
 pub mod explicit_dynamics;
 pub mod amr;
 pub mod contact_enhanced;

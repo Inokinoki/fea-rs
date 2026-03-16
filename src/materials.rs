@@ -8,6 +8,7 @@
 pub mod nonlinear;
 pub mod plasticity;
 pub mod hyperelastic;
+pub mod damage;
 
 /// Material properties for structural analysis.
 #[derive(Debug, Clone, Copy)]

@@ -6,7 +6,7 @@
 pub mod nafems;
 
 pub use nafems::{
-    NafemsLe1 as NafemsLe1Legacy, NafemsLE2, NafemsTorsion, NafemsBeam,
+    NafemsLE2 as NafemsLE2New, NafemsTorsion as NafemsTorsionNew, NafemsBeam as NafemsBeamNew,
     BenchmarkResult, BenchmarkSuite,
 };
 

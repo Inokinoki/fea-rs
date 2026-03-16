@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+<head><title>Test</title></head>
+<body>
+<h1>Simple Test</h1>
+<p>If you see this, the server is working.</p>
+<script>
+  fetch('./model.json')
+    .then(r => {
+      console.log('Status:', r.status);
+      return r.json();
+    })
+    .then(d => {
+      document.body.innerHTML += '<p style="color:green">model.json loaded: ' + d.points.length + ' nodes</p>';
+    })
+    .catch(e => {
+      document.body.innerHTML += '<p style="color:red">Error: ' + e + '</p>';
+    });
+</script>
+</body>
+</html>
