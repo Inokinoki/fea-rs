@@ -6,6 +6,7 @@
 //! - Nonlinear material models (hyperelastic, plasticity, damage)
 
 pub mod nonlinear;
+pub mod plasticity;
 
 /// Material properties for structural analysis.
 #[derive(Debug, Clone, Copy)]
