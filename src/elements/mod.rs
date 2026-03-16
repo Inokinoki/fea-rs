@@ -96,6 +96,10 @@ pub trait Element: Clone + std::fmt::Debug {
 
 pub mod truss;
 pub mod legacy;
+pub mod plate;
+pub mod beam;
 
 pub use truss::Truss2;
 pub use legacy::{Truss2Legacy, ElementLegacy};
+pub use plate::{Plate4, Plate8};
+pub use beam::{Beam2DElement, Beam3DElement};

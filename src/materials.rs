@@ -3,6 +3,9 @@
 //! This module provides:
 //! - Predefined material properties (Young's modulus, Poisson's ratio, density)
 //! - Material selection utilities
+//! - Nonlinear material models (hyperelastic, plasticity, damage)
+
+pub mod nonlinear;
 
 /// Material properties for structural analysis.
 #[derive(Debug, Clone, Copy)]
