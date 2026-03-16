@@ -268,6 +268,11 @@ pub mod prelude {
             GPUContext as GPUKernelContext, GPUStream as GPUKernelStream,
             vector_kernels, sparse_kernels, cg_kernel,
         },
+        gpu_thermal::{
+            GPUThermalContext, ThermalElementType, ThermalBoundaryCondition,
+            GPUThermalResult, solve_steady_thermal_gpu, solve_transient_thermal_gpu,
+            compute_heat_flux,
+        },
     };
 
     // Pre-processing

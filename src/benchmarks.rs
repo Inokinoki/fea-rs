@@ -3,6 +3,13 @@
 //! This module provides standard benchmark problems from NAFEMS
 //! for validating FEA implementations.
 
+pub mod nafems;
+
+pub use nafems::{
+    NafemsLe1 as NafemsLe1Legacy, NafemsLE2, NafemsTorsion, NafemsBeam,
+    BenchmarkResult, BenchmarkSuite,
+};
+
 use crate::core::{BoundaryCondition, Dof, Load, Model, Node};
 use crate::elements_legacy::Truss2 as Truss2;
 use crate::solver::LinearStaticSolver;
