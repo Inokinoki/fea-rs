@@ -7,7 +7,7 @@
 //! - JSON export for web visualization
 
 use crate::core::{Dof, Model, NodeId};
-use crate::elements::{Element, Truss2};
+use crate::elements_legacy::{ElementOld as Element, Truss2};
 use nalgebra::{DMatrix, DVector};
 use serde::Serialize;
 use std::collections::BTreeSet;

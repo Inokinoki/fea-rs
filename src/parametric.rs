@@ -6,8 +6,8 @@
 //! - Result comparison utilities
 //! - Design of experiments (DOE) helpers
 
-use crate::core::{BoundaryCondition, Dof, Load, Model, Node};
-use crate::elements::Truss2;
+use crate::core::{Dof, Load, Model};
+use crate::elements_legacy::Truss2;
 use crate::solver::LinearStaticSolver;
 use serde::Serialize;
 use std::collections::HashMap;
@@ -432,7 +432,7 @@ pub fn export_parametric_results_csv<P: AsRef<Path>>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::core::Node;
+    use crate::core::{Node, BoundaryCondition};
 
     #[test]
     fn test_parametric_variable_range() {

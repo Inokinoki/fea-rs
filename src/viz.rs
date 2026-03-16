@@ -1,5 +1,5 @@
 use crate::core::{Dof, Model};
-use crate::elements::Truss2;
+use crate::elements_legacy::Truss2;
 use serde::Serialize;
 use std::fs::File;
 use std::io::{BufWriter, Write};
