@@ -1,4 +1,5 @@
 //! Advanced Contact Mechanics.
+#![allow(unused_variables)]
 //!
 //! This module provides advanced contact algorithms:
 //! - Surface-to-surface contact
@@ -302,7 +303,7 @@ impl AugmentedLagrangianContact {
         let mut lambdas = DVector::zeros(m);
 
         // Initial displacement (no contact)
-        let mut u = k.clone().lu().solve(f).unwrap_or_else(|| DVector::zeros(n));
+        let u = k.clone().lu().solve(f).unwrap_or_else(|| DVector::zeros(n));
 
         for _iter in 0..self.max_iterations {
             // Check contact status

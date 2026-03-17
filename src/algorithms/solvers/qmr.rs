@@ -1,4 +1,6 @@
 //! QMR (Quasi-Minimal Residual) solver.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! QMR is a smoothing variant of BiCG that minimizes the residual norm
 //! over the Krylov subspace without requiring matrix transposes.
@@ -39,7 +41,7 @@ impl QMRSolver {
 
         let mut x = vec![0.0; n];
         let mut r = b.data.as_vec().clone();
-        let mut r_hat = r.clone(); // Shadow residual (can be same as r for QMR)
+        let r_hat = r.clone(); // Shadow residual (can be same as r for QMR)
 
         let b_norm = b.norm();
         let tol = self.tolerance * b_norm.max(1e-15);

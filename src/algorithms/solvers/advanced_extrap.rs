@@ -1,4 +1,6 @@
 //! Advanced vector extrapolation methods.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 
 use nalgebra::{DMatrix, DVector};
 

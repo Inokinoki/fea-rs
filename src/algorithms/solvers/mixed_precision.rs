@@ -1,4 +1,6 @@
 //! Mixed Precision Iterative Solvers.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! This module provides mixed precision solvers that use lower precision
 //! arithmetic for most operations and higher precision for corrections,
@@ -159,7 +161,7 @@ impl MixedPrecisionSolver {
     /// Inner solve using low precision factorization.
     fn inner_solve(
         &self,
-        lu: &nalgebra::LU<f64, nalgebra::Dynamic, nalgebra::Dynamic>,
+        lu: &nalgebra::LU<f64, nalgebra::Dyn, nalgebra::Dyn>,
         b_low: &DVector<f64>,
     ) -> (DVector<f64>, usize) {
         // Direct solve using LU factorization

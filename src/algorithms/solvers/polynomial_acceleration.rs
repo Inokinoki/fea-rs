@@ -1,4 +1,6 @@
 //! Polynomial and rational approximation acceleration methods.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! This module provides:
 //! - Polynomial acceleration for iterative methods

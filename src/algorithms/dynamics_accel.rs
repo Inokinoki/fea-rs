@@ -1,4 +1,5 @@
 //! Dynamic analysis acceleration methods.
+#![allow(unused_variables)]
 //!
 //! This module provides:
 //! - Modal superposition acceleration

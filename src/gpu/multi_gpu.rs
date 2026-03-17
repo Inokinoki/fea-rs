@@ -7,8 +7,7 @@
 //! - Load balancing across devices
 //! - Asynchronous kernel execution
 
-use crate::gpu::{GPUDevice, DeviceType, GPUMemory, GPUStream, GPUCSRMatrix};
-use std::sync::Arc;
+use crate::gpu::{GPUDevice, DeviceType, GPUStream};
 
 /// Multi-GPU manager for coordinating multiple devices.
 #[derive(Debug)]

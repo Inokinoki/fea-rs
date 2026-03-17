@@ -1,4 +1,5 @@
 //! Plate elements for 2D structural analysis.
+#![allow(unused_variables)]
 //!
 //! This module provides:
 //! - Plate4: 4-node quadrilateral plate element (plane stress/strain)
@@ -8,7 +9,7 @@
 
 use super::{Element, ElementContext};
 use crate::core::NodeId;
-use nalgebra::{DMatrix, DVector, Matrix2, Matrix3};
+use nalgebra::{DMatrix, Matrix2, Matrix3};
 
 /// A 4-node quadrilateral plate element for plane stress/strain analysis.
 ///

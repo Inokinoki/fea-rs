@@ -1,4 +1,6 @@
 //! Parallel iterative solvers for distributed memory systems.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! This module provides:
 //! - Parallel CG with domain decomposition

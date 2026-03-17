@@ -1,4 +1,6 @@
 //! Domain decomposition preconditioners for parallel FEA.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! This module provides:
 //! - Additive Schwarz Method (ASM)

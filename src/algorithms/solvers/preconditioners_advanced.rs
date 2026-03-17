@@ -1,4 +1,6 @@
 //! Advanced preconditioning techniques for iterative solvers.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! This module provides state-of-the-art preconditioners:
 //! - Factorized Sparse Approximate Inverse (FSAI)

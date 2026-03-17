@@ -1,4 +1,6 @@
 //! Generalized Conjugate Residual (GCR) solver.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! GCR is effective for non-symmetric positive definite systems.
 //! It minimizes the residual norm over the Krylov subspace.

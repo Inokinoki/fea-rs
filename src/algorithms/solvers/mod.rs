@@ -1,4 +1,8 @@
 //! Solver traits and implementations.
+#![allow(non_snake_case)]
+#![allow(unused_mut)]
+#![allow(unused_variables)]
+#![allow(unused_assignments)]
 //!
 //! This module provides:
 //! - The Solver trait for linear system solvers
@@ -15,6 +19,10 @@
 //! - Nonlinear acceleration (Epsilon, Levin U, Theta, Combined, Anderson, NGMRES)
 //! - Polynomial acceleration (Chebyshev, Minimal Residual, BB, Nonlinear CG)
 //! - Classical acceleration (Aitken, DIIS, MRS, Steffensen)
+
+#![allow(non_snake_case)]
+#![allow(unused_variables)]
+#![allow(unused_mut)]
 
 pub mod lanczos;
 pub mod multigrid;

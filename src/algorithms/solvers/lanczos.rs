@@ -1,4 +1,6 @@
 //! Lanczos algorithm for eigenvalue problems.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! This module provides:
 //! - Lanczos iteration for symmetric eigenvalue problems

@@ -1,4 +1,5 @@
 //! Damage Mechanics Models.
+#![allow(unused_variables)]
 //!
 //! This module provides damage mechanics for material degradation:
 //! - Continuum damage mechanics
@@ -6,7 +7,7 @@
 //! - Fatigue damage
 //! - Ductile damage models
 
-use nalgebra::{DMatrix, DVector};
+
 
 /// Damage state.
 #[derive(Debug, Clone, Copy, Default)]

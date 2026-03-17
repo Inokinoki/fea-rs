@@ -1,4 +1,5 @@
 //! GPU acceleration module for FEA computations.
+#![allow(unexpected_cfgs)]
 //!
 //! This module provides:
 //! - GPU memory management for CUDA and OpenCL backends
@@ -11,6 +12,8 @@
 //! - `gpu-cuda` - CUDA backend support
 //! - `gpu-opencl` - OpenCL backend support
 //! - `gpu` - Enable all GPU backends
+
+#![allow(dead_code)]
 
 pub mod cuda;
 pub mod opencl;
@@ -44,7 +47,7 @@ pub mod gpu_kernels_lib;
 pub mod gpu_kernel_library;
 pub mod gpu_thermal;
 
-use std::fmt;
+
 
 /// GPU device information.
 #[derive(Debug, Clone)]

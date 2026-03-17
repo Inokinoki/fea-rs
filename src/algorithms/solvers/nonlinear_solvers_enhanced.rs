@@ -1,4 +1,6 @@
 //! Enhanced nonlinear solver acceleration methods.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! This module provides:
 //! - Line search methods for Newton-Raphson

@@ -1,4 +1,5 @@
 //! Adaptive Mesh Refinement (AMR) and error estimation.
+#![allow(unused_variables)]
 //!
 //! This module provides:
 //! - Mesh quality indicators
@@ -6,8 +7,7 @@
 //! - Mesh refinement strategies
 //! - Solution adaptive refinement
 
-use nalgebra::{DMatrix, DVector, Point2, Point3};
-use crate::elements::{Element, ElementContext};
+use nalgebra::{DMatrix, DVector, Point2};
 
 /// Mesh quality metrics.
 #[derive(Debug, Clone)]

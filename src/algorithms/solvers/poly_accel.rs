@@ -1,8 +1,10 @@
 //! Polynomial acceleration methods for iterative processes.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! Methods based on polynomial approximation of the iteration function.
 
-use nalgebra::{DMatrix, DVector};
+use nalgebra::DVector;
 
 /// Chebyshev semi-iterative acceleration.
 ///

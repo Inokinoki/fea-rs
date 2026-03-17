@@ -7,9 +7,9 @@
 //! - Sparse direct solvers (GPU-accelerated LU)
 //! - Matrix norms and condition number estimation
 
-use nalgebra::{DMatrix, DVector};
 
-use super::{GPUCSRMatrix, SparseMatrixVectorMul, VectorOps, GPUSolverResult};
+
+use super::{GPUCSRMatrix, SparseMatrixVectorMul, VectorOps};
 
 /// GPU sparse matrix addition: C = alpha*A + beta*B
 pub fn sparse_add(

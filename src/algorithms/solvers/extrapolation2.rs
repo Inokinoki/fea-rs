@@ -1,4 +1,6 @@
 //! Advanced extrapolation and convergence acceleration methods.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 
 use nalgebra::{DMatrix, DVector};
 
@@ -287,7 +289,7 @@ pub struct HybridAccelerator {
     success_count: Vec<usize>,
 }
 
-trait AccelerationMethod: Send {
+pub trait AccelerationMethod: Send {
     fn update(&mut self, x: &DVector<f64>, g: &DVector<f64>) -> DVector<f64>;
     fn reset(&mut self);
 }

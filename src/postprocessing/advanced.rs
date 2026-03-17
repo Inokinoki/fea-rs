@@ -1,4 +1,5 @@
 //! Advanced Post-Processing for FEA Results.
+#![allow(unused_variables)]
 //!
 //! This module provides:
 //! - Contour plot generation

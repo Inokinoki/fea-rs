@@ -1,4 +1,5 @@
 //! Algorithms for finite element analysis.
+#![allow(unused_variables)]
 //!
 //! This module provides:
 //! - Solver traits and implementations

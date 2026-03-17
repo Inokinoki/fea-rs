@@ -6,10 +6,10 @@
 //! - Pivoting for numerical stability
 //! - Batched factorization for multiple matrices
 
-use nalgebra::{DMatrix, DVector};
+use nalgebra::DMatrix;
 use std::time::Instant;
 
-use super::{GPUCSRMatrix, GPUSolverResult, SparseMatrixVectorMul, VectorOps};
+use super::GPUCSRMatrix;
 
 /// GPU sparse LU factorization.
 pub struct GPUSparseLU {

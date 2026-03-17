@@ -1,4 +1,6 @@
 //! Tensor product and multilevel acceleration methods.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! This module provides:
 //! - Tensor product preconditioners

@@ -6,8 +6,7 @@
 //! - Krylov-Schur eigensolver
 //! - Spectral transformation for interior eigenvalues
 
-use nalgebra::{DMatrix, DVector, Matrix3};
-use super::{GPUCSRMatrix, SparseMatrixVectorMul, VectorOps, GPUSolverResult};
+use super::{GPUCSRMatrix, SparseMatrixVectorMul, VectorOps};
 
 /// GPU-accelerated Lanczos solver for symmetric eigenvalue problems.
 #[derive(Debug, Clone)]
@@ -104,7 +103,7 @@ impl GPULanczosSolver {
     fn compute_tridiagonal_eigenpairs(&self, alpha: &[f64], beta: &[f64]) -> (Vec<f64>, Vec<Vec<f64>>) {
         let n = alpha.len();
         let mut eig = alpha.to_vec();
-        let mut e = beta.to_vec();
+        let e = beta.to_vec();
 
         // Use implicit QL algorithm for tridiagonal eigenvalue problem
         for i in 0..n {

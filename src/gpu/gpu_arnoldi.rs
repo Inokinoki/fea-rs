@@ -5,7 +5,7 @@
 //! - Implicitly Restarted Arnoldi (IRAM)
 //! - Hessenberg matrix operations
 
-use nalgebra::{DMatrix, DVector};
+use nalgebra::DMatrix;
 use std::time::Instant;
 
 use super::{GPUCSRMatrix, SparseMatrixVectorMul, VectorOps};

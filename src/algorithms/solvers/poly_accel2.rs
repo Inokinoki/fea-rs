@@ -1,4 +1,6 @@
 //! Polynomial acceleration and minimal residual methods.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 
 use nalgebra::{DMatrix, DVector};
 

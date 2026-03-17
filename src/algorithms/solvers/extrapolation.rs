@@ -1,4 +1,6 @@
 //! Vector extrapolation methods for accelerating convergence.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! This module provides:
 //! - Minimal Polynomial Extrapolation (MPE)

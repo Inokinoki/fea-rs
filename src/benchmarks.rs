@@ -13,7 +13,7 @@ pub use nafems::{
 use crate::core::{BoundaryCondition, Dof, Load, Model, Node};
 use crate::elements_legacy::Truss2 as Truss2;
 use crate::solver::LinearStaticSolver;
-use nalgebra::{DMatrix, DVector};
+
 
 /// NAFEMS LE1: Plate with a circular hole under tension.
 ///

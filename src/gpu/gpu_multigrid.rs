@@ -7,10 +7,9 @@
 //! - Geometric and algebraic multigrid
 //! - GPU smoothing operations
 
-use nalgebra::DVector;
 use std::time::Instant;
 
-use super::{GPUCSRMatrix, SparseMatrixVectorMul, VectorOps};
+use super::{GPUCSRMatrix, SparseMatrixVectorMul};
 
 /// Multigrid cycle type.
 #[derive(Debug, Clone, Copy)]

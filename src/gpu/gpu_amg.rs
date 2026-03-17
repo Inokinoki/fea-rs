@@ -6,10 +6,10 @@
 //! - GPU-accelerated coarse grid solves
 //! - Adaptive setup for difficult problems
 
-use nalgebra::{DMatrix, DVector};
-use std::collections::HashMap;
 
-use super::{GPUCSRMatrix, GPUSolverResult, SparseMatrixVectorMul, VectorOps};
+
+
+use super::{GPUCSRMatrix, SparseMatrixVectorMul, VectorOps};
 
 /// AMG hierarchy level.
 #[derive(Debug, Clone)]

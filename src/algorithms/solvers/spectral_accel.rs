@@ -1,4 +1,6 @@
 //! Polynomial and spectral acceleration methods.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! This module provides advanced polynomial-based acceleration:
 //! - Chebyshev semi-iterative methods

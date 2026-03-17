@@ -1,4 +1,5 @@
 //! Plasticity Material Models.
+#![allow(unused_variables)]
 //!
 //! This module provides elastoplastic material models:
 //! - von Mises yield criterion

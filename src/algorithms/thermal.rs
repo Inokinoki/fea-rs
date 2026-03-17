@@ -1,12 +1,12 @@
 //! Thermal stress analysis module.
+#![allow(unused_variables)]
 //!
 //! This module provides:
 //! - Thermal load computation from temperature fields
 //! - Thermal stress analysis for truss elements
 //! - Temperature-dependent material properties
 
-use crate::core::{Dof, Load, Model, NodeId};
-use nalgebra::DVector;
+use crate::core::{Dof, Load, Model};
 
 /// Thermal expansion coefficient data.
 #[derive(Debug, Clone, Copy)]

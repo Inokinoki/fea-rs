@@ -1,4 +1,5 @@
 //! Explicit dynamic analysis for FEA.
+#![allow(unused_variables)]
 //!
 //! This module provides:
 //! - Central difference method
@@ -9,7 +10,6 @@
 //! - Energy conservation monitoring
 
 use nalgebra::{DMatrix, DVector};
-use crate::algorithms::solvers::SolverResult;
 
 /// Explicit time integration method.
 #[derive(Debug, Clone, Copy)]
@@ -229,7 +229,7 @@ impl ExplicitDynamicAnalyzer {
             }
         }
 
-        let final_time = (t_history.last().copied().unwrap_or(0.0));
+        let final_time = t_history.last().copied().unwrap_or(0.0);
 
         Ok(ExplicitDynamicResult {
             displacement_history: u_history,
@@ -402,7 +402,7 @@ impl ExplicitDynamicAnalyzer {
                 let ku = &self.stiffness * &DVector::from_column_slice(u);
                 let f_ext = external_force(t, u);
 
-                let mut u_dot = v.to_vec();
+                let u_dot = v.to_vec();
                 let mut v_dot = Vec::with_capacity(n);
 
                 for i in 0..n {

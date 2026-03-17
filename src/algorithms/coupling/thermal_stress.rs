@@ -6,7 +6,7 @@
 //! - Coupled thermal-stress solver
 //! - Thermo-elastic stress calculation
 
-use nalgebra::{DMatrix, DVector, Vector3};
+use nalgebra::{DMatrix, DVector};
 use crate::algorithms::contact::frictional::ContactState;
 
 /// Thermal expansion coefficient tensor.

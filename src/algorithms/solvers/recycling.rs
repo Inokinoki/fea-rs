@@ -1,9 +1,11 @@
 //! Krylov subspace recycling for sequences of linear systems.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! When solving A*x = b for multiple right-hand sides or slowly
 //! changing systems, recycling Krylov subspaces accelerates convergence.
 
-use super::{IterativeConfig, SolverResult};
+use super::SolverResult;
 use nalgebra::{DMatrix, DVector};
 
 /// Krylov subspace recycling preconditioner.

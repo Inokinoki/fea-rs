@@ -1,4 +1,5 @@
 //! Beam elements for structural analysis.
+#![allow(unused_variables)]
 //!
 //! This module provides:
 //! - Euler-Bernoulli beam element (2D and 3D)
@@ -6,7 +7,7 @@
 
 use super::{Element, ElementContext};
 use crate::core::NodeId;
-use nalgebra::{DMatrix, DVector};
+use nalgebra::DMatrix;
 
 /// A 2-node Euler-Bernoulli beam element in 2D.
 ///
@@ -118,7 +119,7 @@ impl Beam2DElement {
         }
 
         let e = ctx.material.young_modulus;
-        let i = ctx.section.i_z;
+        let _i = ctx.section.i_z;
 
         // Extract local displacements (simplified - assumes proper DOF mapping)
         // In practice, would need proper transformation

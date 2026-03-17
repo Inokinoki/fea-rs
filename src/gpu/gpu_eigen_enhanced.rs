@@ -7,7 +7,7 @@
 //! - Spectral transformation
 //! - Eigenvalue extraction
 
-use nalgebra::{DMatrix, DVector, SymmetricEigen};
+use nalgebra::{DMatrix, SymmetricEigen};
 use std::time::Instant;
 
 use super::{GPUCSRMatrix, SparseMatrixVectorMul, VectorOps};

@@ -10,7 +10,7 @@
 use nalgebra::{DMatrix, DVector, SVD};
 use std::time::Instant;
 
-use super::{GPUCSRMatrix, SparseMatrixVectorMul};
+
 
 /// Reduced order model using POD.
 pub struct ReducedOrderModel {

@@ -1,4 +1,5 @@
 //! 2-node truss element in 3D space.
+#![allow(unused_variables)]
 
 use super::{Element, ElementContext};
 use crate::core::NodeId;

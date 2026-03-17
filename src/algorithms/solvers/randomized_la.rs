@@ -6,7 +6,7 @@
 //! - Subspace iteration with randomization
 //! - Sketching-based preconditioners
 
-use nalgebra::{DMatrix, DVector, QR, SymmetricEigen};
+use nalgebra::{DMatrix, DVector, SymmetricEigen};
 
 /// Randomized SVD for low-rank approximation.
 #[derive(Debug, Clone)]
@@ -405,7 +405,7 @@ impl CountSketch {
         let mut s = Vec::with_capacity(input_dim);
 
         for i in 0..input_dim {
-            h.push(((seed + i * 17) % sketch_size));
+            h.push((seed + i * 17) % sketch_size);
             s.push(if (seed + i * 31) % 2 == 0 { 1 } else { -1 });
         }
 

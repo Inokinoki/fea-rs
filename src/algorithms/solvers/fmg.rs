@@ -1,4 +1,6 @@
 //! Full Multigrid (FMG) solver.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! This module provides a full multigrid solver that can be used
 //! as a standalone solver or as a preconditioner.

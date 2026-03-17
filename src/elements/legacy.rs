@@ -1,4 +1,5 @@
 //! Legacy element trait and wrapper for backward compatibility.
+#![allow(unused_variables)]
 
 use crate::core::{Dof, Model, NodeId};
 use nalgebra::DMatrix;

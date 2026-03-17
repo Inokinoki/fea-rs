@@ -1,4 +1,5 @@
 //! Advanced pre-processing utilities for FEA.
+#![allow(unused_variables)]
 //!
 //! This module provides:
 //! - Geometry primitives (block, cylinder, sphere)
@@ -8,7 +9,7 @@
 //! - Coordinate system transformations
 
 use crate::core::Node;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 /// Named selection set for grouping nodes/elements.
 #[derive(Debug, Clone)]

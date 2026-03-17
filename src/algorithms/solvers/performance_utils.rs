@@ -1,4 +1,6 @@
 //! Acceleration Performance Utilities.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! This module provides utilities for measuring, analyzing, and optimizing
 //! the performance of acceleration methods.

@@ -1,4 +1,6 @@
 //! Advanced Krylov Subspace Methods.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! This module provides advanced Krylov subspace methods including:
 //! - Flexible GMRES (FGMRES)
@@ -6,7 +8,7 @@
 //! - Deflated CG
 //! - Augmented Krylov methods
 
-use nalgebra::{DMatrix, DVector, QR};
+use nalgebra::{DMatrix, DVector};
 
 /// Flexible GMRES solver allowing variable preconditioning.
 #[derive(Debug, Clone)]

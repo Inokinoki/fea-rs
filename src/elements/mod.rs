@@ -1,4 +1,5 @@
 //! Element traits and implementations.
+#![allow(unused_variables)]
 //!
 //! This module provides:
 //! - The Element trait for all finite elements

@@ -1,4 +1,6 @@
 //! Block-Jacobi preconditioner with multiple block sizes.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! Block-Jacobi is more effective than point-Jacobi for systems
 //! with block structure, such as those from coupled physics problems.

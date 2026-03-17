@@ -1,8 +1,12 @@
 //! Nonlinear Richardson extrapolation and convergence acceleration.
+#![allow(private_interfaces)]
+#![allow(unused_imports)]
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! Advanced extrapolation methods for accelerating iterative processes.
 
-use nalgebra::{DMatrix, DVector};
+use nalgebra::DVector;
 
 /// Epsilon algorithm (Wynn's epsilon algorithm).
 ///

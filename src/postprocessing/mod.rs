@@ -1,4 +1,5 @@
 //! Post-processing module for FEA results.
+#![allow(unused_variables)]
 //!
 //! This module provides:
 //! - Result visualization utilities
@@ -8,10 +9,10 @@
 //! - Result statistics and analysis
 
 use crate::core::{Node, Load, BoundaryCondition};
-use nalgebra::DVector;
-use std::collections::HashMap;
+
+
 use std::fs::File;
-use std::io::{BufRead, BufReader, Write};
+use std::io::Write;
 use std::path::Path;
 
 /// FEA analysis results structure.
@@ -520,7 +521,7 @@ pub mod report_generation {
         let total_load: f64 = loads.iter().map(|l| l.value.abs()).sum();
         let total_reaction = results.total_reaction_magnitude();
         let error = if total_load > 0.0 {
-            ((total_reaction - total_load).abs() / total_load * 100.0)
+            (total_reaction - total_load).abs() / total_load * 100.0
         } else {
             0.0
         };

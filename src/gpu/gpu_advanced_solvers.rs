@@ -7,10 +7,10 @@
 //! - Adaptive tolerance control
 //! - Convergence monitoring
 
-use nalgebra::{DMatrix, DVector};
+
 use std::time::Instant;
 
-use super::{GPUCSRMatrix, GPUSolverResult, SparseMatrixVectorMul, VectorOps};
+use super::{GPUCSRMatrix, SparseMatrixVectorMul, VectorOps};
 use super::gpu_precond::GPUILUPreconditioner;
 
 /// Mixed precision CG solver configuration.

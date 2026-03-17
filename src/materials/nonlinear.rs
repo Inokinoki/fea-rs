@@ -1,4 +1,5 @@
 //! Material models for nonlinear FEA.
+#![allow(unused_variables)]
 //!
 //! This module provides:
 //! - Linear elastic material
@@ -8,7 +9,7 @@
 //! - Johnson-Cook viscoplasticity
 //! - Damage mechanics
 
-use nalgebra::{DMatrix, DVector, Matrix6};
+use nalgebra::Matrix6;
 
 /// Stress-strain state.
 #[derive(Debug, Clone, Default)]

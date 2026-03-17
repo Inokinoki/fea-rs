@@ -1,4 +1,6 @@
 //! Unified Acceleration Framework for FEA Solvers.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! This module provides a unified interface for all acceleration methods,
 //! allowing easy composition and automatic selection of optimal strategies.

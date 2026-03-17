@@ -6,7 +6,7 @@
 //! - LE10: 3D solid element patch test
 //! - Torsion: 3D torsion of a bar
 
-use nalgebra::{DMatrix, DVector};
+
 
 /// Benchmark result summary.
 #[derive(Debug, Clone)]

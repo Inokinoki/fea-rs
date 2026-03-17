@@ -1,4 +1,6 @@
 //! Block iterative solvers for coupled systems.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! This module provides:
 //! - Block Jacobi solver

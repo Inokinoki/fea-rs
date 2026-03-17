@@ -2,7 +2,7 @@
 //!
 //! This module provides GPU-accelerated kernels for common FEA operations:
 //! - Sparse matrix-vector multiplication
-//! - Vector operations (axpy, dot, norm, scale)
+//! - Vector operations (axpy, dot, norm)
 //! - Matrix operations (assembly, factorization)
 //! - Preconditioner application
 //! - Solver kernels (CG, GMRES)
@@ -197,7 +197,7 @@ pub mod sparse_kernels {
 pub mod cg_kernel {
     use super::*;
     use sparse_kernels::CSRMatrix;
-    use vector_kernels::{axpy, dot, norm, scale};
+    use vector_kernels::{axpy, dot, norm};
 
     /// Conjugate Gradient solver result.
     #[derive(Debug, Clone)]

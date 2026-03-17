@@ -1,10 +1,11 @@
 //! Preconditioned Conjugate Gradient (PCG) with Advanced Acceleration.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! This module provides an optimized PCG solver with multiple acceleration
 //! techniques that can be combined for maximum performance.
 
 use nalgebra::{DMatrix, DVector};
-use crate::algorithms::solvers::preconditioners_advanced::FSAIPreconditioner;
 
 /// Configuration for accelerated PCG solver.
 #[derive(Debug, Clone)]

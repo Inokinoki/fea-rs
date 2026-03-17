@@ -544,7 +544,7 @@ impl Default for NonlinearStaticAnalysis {
 
 /// Material nonlinear models.
 pub mod material_nonlinearity {
-    use nalgebra::{DVector, DMatrix};
+    use nalgebra::DMatrix;
 
     /// Elastoplastic material model with isotropic hardening.
     #[derive(Debug, Clone)]
@@ -628,7 +628,7 @@ pub mod material_nonlinearity {
 
 /// Geometric nonlinearity utilities.
 pub mod geometric_nonlinearity {
-    use nalgebra::{DMatrix, DVector};
+    use nalgebra::DMatrix;
 
     /// Computes the Green-Lagrange strain tensor.
     /// E = 0.5 * (F^T * F - I)

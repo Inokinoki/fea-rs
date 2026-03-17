@@ -6,9 +6,7 @@
 //! - Batched sparse operations
 //! - Multi-GPU support framework
 
-use nalgebra::{DMatrix, DVector};
-
-use super::{GPUCGSolver, GPUCSRMatrix, GPUSolverResult, SparseMatrixVectorMul, VectorOps};
+use super::{GPUCSRMatrix, GPUSolverResult, SparseMatrixVectorMul, VectorOps};
 
 /// GPU-accelerated GMRES solver.
 #[derive(Debug, Clone)]
@@ -226,7 +224,7 @@ impl GPUBiCGSTABSolver {
         let vec_ops = VectorOps::new(self.device_id);
 
         let mut r: Vec<f64> = b.to_vec();
-        let mut r_hat = r.clone();
+        let r_hat = r.clone();
 
         let b_norm = vec_ops.norm(b);
         let tol = self.tolerance * b_norm.max(1e-15);

@@ -1,4 +1,6 @@
 //! Enhanced Krylov subspace methods with advanced recycling techniques.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! This module provides:
 //! - Deflated GMRES with subspace recycling

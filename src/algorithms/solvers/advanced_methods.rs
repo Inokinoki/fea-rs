@@ -1,4 +1,6 @@
 //! Advanced acceleration techniques for FEA solvers.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! This module provides:
 //! - Riesz acceleration methods
@@ -6,7 +8,7 @@
 //! - Vector sequence acceleration
 //! - Convergence enhancement techniques
 
-use nalgebra::{DMatrix, DVector};
+use nalgebra::DVector;
 
 /// Riesz acceleration for gradient methods.
 ///

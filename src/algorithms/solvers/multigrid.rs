@@ -1,4 +1,6 @@
 //! Multigrid preconditioners and solvers.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! This module provides:
 //! - Geometric multigrid V-cycles

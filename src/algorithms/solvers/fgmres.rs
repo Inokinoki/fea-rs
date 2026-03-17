@@ -1,9 +1,11 @@
 //! Flexible GMRES (FGMRES) solver for variable preconditioning.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! FGMRES allows the preconditioner to change at each iteration,
 //! which is useful for nonlinear problems and approximate preconditioners.
 
-use super::{IterativeConfig, SolverResult};
+use super::SolverResult;
 use nalgebra::{DMatrix, DVector};
 
 /// Flexible GMRES solver.

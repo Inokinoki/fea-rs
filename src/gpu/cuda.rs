@@ -11,7 +11,6 @@
 
 #[cfg(feature = "gpu-cuda")]
 pub mod cuda_backend {
-    use anyhow::Context;
 
     /// CUDA device handle (placeholder for actual CUDAFFI).
     #[derive(Debug, Clone)]
@@ -364,7 +363,6 @@ pub use cuda_backend::*;
 // Stub implementations when feature is disabled
 #[cfg(not(feature = "gpu-cuda"))]
 pub mod cuda_backend {
-    use anyhow::Context;
 
     #[derive(Debug, Clone)]
     pub struct CUDADevice {

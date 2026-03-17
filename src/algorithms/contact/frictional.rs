@@ -6,7 +6,7 @@
 //! - Augmented Lagrangian friction
 //! - Stick-slip transition detection
 
-use nalgebra::{DMatrix, DVector, Vector3};
+use nalgebra::{DMatrix, Vector3};
 
 /// Coulomb friction model parameters.
 #[derive(Debug, Clone)]

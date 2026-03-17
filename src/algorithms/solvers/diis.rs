@@ -1,4 +1,6 @@
 //! DIIS (Direct Inversion in Iterative Subspace) acceleration.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! DIIS accelerates convergence by extrapolating from a subspace
 //! of previous iterates. Commonly used in quantum chemistry SCF.
@@ -142,7 +144,7 @@ impl CGSSolver {
 
         let mut x = vec![0.0; n];
         let mut r = b.data.as_vec().clone();
-        let mut r_hat = r.clone();
+        let r_hat = r.clone();
 
         let b_norm = b.norm();
         let tol = self.tolerance * b_norm.max(1e-15);

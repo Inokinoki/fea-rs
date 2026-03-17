@@ -1,4 +1,6 @@
 //! Aitken acceleration for iterative methods.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! Aitken's delta-squared process accelerates the convergence
 //! of linearly convergent sequences.

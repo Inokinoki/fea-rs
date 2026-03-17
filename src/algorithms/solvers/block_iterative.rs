@@ -1,4 +1,6 @@
 //! Block iterative solvers for large sparse systems.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! This module provides:
 //! - Block Jacobi solver
@@ -6,7 +8,7 @@
 //! - Block CG solver
 //! - Block ILU preconditioner
 
-use nalgebra::{DMatrix, DVector, LU};
+use nalgebra::{DMatrix, DVector};
 
 /// Block Jacobi iterative solver.
 #[derive(Debug, Clone)]

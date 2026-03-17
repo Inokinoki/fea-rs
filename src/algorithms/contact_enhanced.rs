@@ -1,4 +1,5 @@
 //! Contact analysis algorithms for FEA.
+#![allow(unused_variables)]
 //!
 //! This module provides:
 //! - Contact detection algorithms
@@ -7,8 +8,7 @@
 //! - Augmented Lagrangian methods
 //! - Mortar contact methods
 
-use nalgebra::{DMatrix, DVector, Point2, Point3, Vector2, Vector3};
-use crate::core::{Node, NodeId};
+use nalgebra::{DMatrix, DVector, Point2, Vector2};
 
 /// Contact pair information.
 #[derive(Debug, Clone)]

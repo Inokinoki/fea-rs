@@ -1,6 +1,8 @@
 //! Additional nonlinear acceleration methods.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 
-use nalgebra::{DMatrix, DVector};
+use nalgebra::DVector;
 
 /// SQUARED (Spectral Quadratic Acceleration).
 pub struct SQUARED {

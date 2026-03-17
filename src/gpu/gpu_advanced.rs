@@ -9,10 +9,8 @@
 //! - Persistent kernel execution
 
 use nalgebra::{DMatrix, DVector};
-use std::sync::Arc;
-use std::time::Instant;
 
-use super::{GPUCSRMatrix, SparseMatrixVectorMul, VectorOps, GPUSolverResult};
+use std::time::Instant;
 
 /// Mixed precision (FP16/FP32) solver for tensor core acceleration.
 pub struct MixedPrecisionSolver {

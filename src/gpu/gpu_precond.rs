@@ -6,8 +6,6 @@
 //! - GPU Chebyshev preconditioner
 //! - Preconditioned CG, GMRES, BiCGSTAB
 
-use nalgebra::{DMatrix, DVector};
-
 use super::{GPUCSRMatrix, GPUSolverResult, SparseMatrixVectorMul, VectorOps};
 
 /// GPU ILU(0) preconditioner.

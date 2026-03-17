@@ -11,7 +11,6 @@
 
 #[cfg(feature = "gpu-opencl")]
 pub mod opencl_backend {
-    use anyhow::Context;
 
     /// OpenCL platform information.
     #[derive(Debug, Clone)]
@@ -421,7 +420,6 @@ pub use opencl_backend::*;
 // Stub implementations when feature is disabled
 #[cfg(not(feature = "gpu-opencl"))]
 pub mod opencl_backend {
-    use anyhow::Context;
 
     #[derive(Debug, Clone)]
     pub struct OpenCLPlatform {

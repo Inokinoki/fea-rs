@@ -1,4 +1,8 @@
 //! Finite Element Analysis (FEA) methods and visualization utilities.
+#![allow(dead_code)]
+#![allow(unused_assignments)]
+#![allow(unused_mut)]
+#![allow(unused_variables)]
 //!
 //! # Overview
 //!

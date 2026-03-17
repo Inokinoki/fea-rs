@@ -1,4 +1,6 @@
 //! Polynomial preconditioners and Chebyshev iteration.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! Polynomial preconditioners apply a polynomial approximation
 //! to the inverse matrix without explicit factorization.

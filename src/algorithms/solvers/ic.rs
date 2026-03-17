@@ -1,4 +1,6 @@
 //! Incomplete Cholesky preconditioner.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! This module provides:
 //! - IC(0) incomplete Cholesky factorization

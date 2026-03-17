@@ -1,4 +1,6 @@
 //! Krylov subspace methods and deflation techniques.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 
 use nalgebra::{DMatrix, DVector};
 

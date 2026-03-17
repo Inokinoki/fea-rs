@@ -1,4 +1,6 @@
 //! Advanced adaptive iterative solvers with intelligent control.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! This module provides:
 //! - PID-controlled convergence acceleration

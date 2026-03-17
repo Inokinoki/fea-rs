@@ -1,4 +1,5 @@
 //! Advanced solvers for finite element analysis.
+#![allow(non_snake_case)]
 //!
 //! This module provides:
 //! - Iterative solvers (Conjugate Gradient) with preconditioning

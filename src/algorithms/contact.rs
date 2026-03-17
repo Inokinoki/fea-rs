@@ -1,4 +1,5 @@
 //! Contact mechanics algorithms for FEA.
+#![allow(unused_variables)]
 //!
 //! This module provides:
 //! - Contact detection algorithms

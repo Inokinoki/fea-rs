@@ -1,4 +1,7 @@
 //! Hyperelastic Material Models.
+#![allow(non_snake_case)]
+#![allow(dead_code)]
+#![allow(unused_variables)]
 //!
 //! This module provides hyperelastic constitutive models for large deformation analysis:
 //! - Neo-Hookean model

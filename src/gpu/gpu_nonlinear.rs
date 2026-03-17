@@ -10,8 +10,8 @@
 use nalgebra::{DMatrix, DVector};
 use std::time::Instant;
 
-use super::{GPUCGSolver, GPUCSRMatrix, SparseMatrixVectorMul, VectorOps};
-use crate::algorithms::nonlinear::{NewtonRaphsonConfig, NewtonRaphsonResult};
+
+use crate::algorithms::nonlinear::NewtonRaphsonResult;
 
 /// GPU-accelerated Newton-Raphson solver.
 pub struct GPUNewtonRaphson {

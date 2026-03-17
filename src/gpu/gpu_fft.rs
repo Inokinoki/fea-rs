@@ -6,7 +6,6 @@
 //! - Spectral analysis utilities
 //! - Convolution via FFT
 
-use nalgebra::{DVector, Matrix2};
 
 /// GPU-accelerated FFT solver.
 #[derive(Debug, Clone)]

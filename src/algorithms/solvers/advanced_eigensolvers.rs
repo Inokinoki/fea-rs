@@ -1,4 +1,6 @@
 //! Advanced Krylov Subspace Methods.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! This module provides advanced Krylov subspace methods including:
 //! - Krylov-Schur eigensolver
@@ -6,7 +8,7 @@
 //! - IRAM (Implicitly Restarted Arnoldi Method)
 //! - Thick-restarted Lanczos
 
-use nalgebra::{DMatrix, DVector, SymmetricEigen, QR};
+use nalgebra::{DMatrix, DVector, SymmetricEigen};
 
 /// Krylov-Schur eigensolver configuration.
 #[derive(Debug, Clone)]

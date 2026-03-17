@@ -1,4 +1,6 @@
 //! Advanced Nonlinear Acceleration Methods.
+#![allow(non_snake_case)]
+#![allow(unused_assignments)]
 //!
 //! This module provides acceleration techniques specifically designed for
 //! nonlinear fixed-point iterations and Newton-type methods:

@@ -1,4 +1,5 @@
 //! Pre-processing module for FEA models.
+#![allow(unused_variables)]
 //!
 //! This module provides:
 //! - Mesh generation utilities (1D, 2D, 3D)
@@ -7,8 +8,8 @@
 //! - Model assembly utilities
 //! - Material assignment helpers
 
-use crate::core::{Node, NodeId, BoundaryCondition, Dof};
-use crate::elements::Truss2;
+use crate::core::{Node, BoundaryCondition, Dof};
+
 use crate::materials::Material;
 use crate::Model;
 use std::collections::HashMap;
@@ -24,7 +25,7 @@ pub mod mesh_generation {
     pub fn generate_bar_1d(
         length: f64,
         num_elements: usize,
-        area: f64,
+        _area: f64,
     ) -> (Vec<Node>, Vec<(usize, usize)>) {
         let dx = length / num_elements as f64;
         let mut nodes = Vec::with_capacity(num_elements + 1);
@@ -1256,6 +1257,7 @@ pub mod advanced;
 mod tests {
     use super::*;
     use mesh_generation::*;
+    use crate::elements::Truss2;
 
     #[test]
     fn test_bar_1d_generation() {
